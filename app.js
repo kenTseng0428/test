@@ -1,4 +1,4 @@
-const storageKey = "peQuoteSystemStateV103";
+const storageKey = "peQuoteSystemStateV104";
 const historyKey = "historyQuotes";
 
 const defaultParams = {
@@ -44,6 +44,7 @@ const defaults = {
 };
 
 let state = loadState();
+if (state.quoteMode === "kg") state.sealMode = "kg";
 let toastTimer = 0;
 
 const $ = (selector) => document.querySelector(selector);
@@ -90,8 +91,20 @@ function money(value, digits = 1) {
   });
 }
 
+function ceilMoney(value, digits = 2) {
+  const factor = 10 ** digits;
+  return Math.ceil(numberValue(value) * factor - 1e-9) / factor;
+}
+
 function pct(value) {
   return `${numberValue(value).toFixed(1)}%`;
+}
+
+function displayDate(dateText) {
+  if (!dateText) return "";
+  const [year, month, day] = String(dateText).split("-");
+  if (!year || !month || !day) return dateText;
+  return `${year}/${month}/${day}`;
 }
 
 function todayString() {
@@ -208,6 +221,12 @@ function renderFields() {
     input.value = state.params[input.dataset.param] ?? "";
   });
 
+  const sealModeSelect = $('[data-field="sealMode"]');
+  if (sealModeSelect) {
+    sealModeSelect.disabled = state.quoteMode === "kg";
+    sealModeSelect.title = state.quoteMode === "kg" ? "按重量計價時，封口計價會同步使用重量計價" : "";
+  }
+
   renderMarginButtons();
 }
 
@@ -295,6 +314,8 @@ function renderResults() {
       <td>${money(amount, 1)}</td>
     </tr>
   `).join("");
+
+  renderFormalQuote(result);
 }
 
 function renderMarginButtons() {
@@ -315,12 +336,17 @@ function syncField(key, value) {
   state[key] = value;
   if (key === "targetMargin") renderMarginButtons();
   if (key === "quoteMode") {
+    if (state.quoteMode === "kg") state.sealMode = "kg";
     const result = calculate();
-    state.customerPrice = result.suggestedPrice > 0 ? Number(result.suggestedPrice.toFixed(2)) : "";
+    state.customerPrice = result.suggestedPrice > 0 ? ceilMoney(result.suggestedPrice, 2) : "";
     saveState();
     renderFields();
     renderResults();
     return;
+  }
+  if (key === "sealMode" && state.quoteMode === "kg") {
+    state.sealMode = "kg";
+    renderFields();
   }
   saveState();
   renderResults();
@@ -344,7 +370,7 @@ function blankQuoteData({ keepQuoteIdentity }) {
     printColors: 0,
     sealMode: "pcs",
     lossRate: "",
-    targetMargin: "",
+    targetMargin: 15,
     quoteMode: "pcs",
     customerPrice: "",
     notes: "",
@@ -362,6 +388,61 @@ function blankQuoteData({ keepQuoteIdentity }) {
 function getCustomValue(label) {
   const found = state.customFields.find((row) => row.label === label);
   return found?.value || "";
+}
+
+function getFirstCustomValue(labels) {
+  const found = labels.map((label) => getCustomValue(label)).find(Boolean);
+  return found || "";
+}
+
+function quoteUnitText() {
+  return state.quoteMode === "kg" ? "KG" : "PCS";
+}
+
+function quoteQuantityText(result) {
+  return state.quoteMode === "kg"
+    ? `${money(result.totalWeight, 1)} KG`
+    : `${money(state.quantity, 0)} PCS`;
+}
+
+function quoteSpecText(result) {
+  const printText = numberValue(state.printColors) > 0 ? `，印刷 ${numberValue(state.printColors)} 色` : "，無印刷";
+  const sealText = state.sealMode === "kg" ? "，封口重量計價" : "，封口單價計價";
+  const kgModeText = state.quoteMode === "kg" ? `，參考袋數 ${money(state.quantity, 0)} PCS` : `，總重量 ${money(result.totalWeight, 1)} KG`;
+  return `${state.bagType}，${state.widthCm || 0}cm × ${state.lengthCm || 0}cm × ${state.thicknessMm || 0}mm，${materialLabel()}${printText}${sealText}${kgModeText}`;
+}
+
+function renderFormalQuote(result = calculate()) {
+  const customerName = getCustomValue("客戶名稱");
+  const productName = getCustomValue("產品名稱") || state.bagType;
+  const contact = getFirstCustomValue(["聯繫人員", "聯絡人", "窗口"]);
+  const phone = getFirstCustomValue(["客戶電話", "電話"]);
+  const taxId = getFirstCustomValue(["客戶統編", "統一編號"]);
+  const delivery = getCustomValue("交期") || "收到正式訂單後安排交貨";
+  const sales = getCustomValue("業務人員") || "Ken";
+  const quoteAmount = result.customerPrice * result.unitDivisor;
+  const itemNotes = [
+    state.notes,
+    state.quoteMode === "kg" ? "本報價採重量計價。" : "",
+    numberValue(state.printColors) > 0 ? `印刷 ${numberValue(state.printColors)} 色` : ""
+  ].filter(Boolean).join(" / ");
+
+  $("#formalQuoteNo").textContent = state.quoteNo || "";
+  $("#formalQuoteDate").textContent = displayDate(state.quoteDate);
+  $("#formalCustomerName").textContent = customerName;
+  $("#formalContact").textContent = contact;
+  $("#formalPhone").textContent = phone;
+  $("#formalTaxId").textContent = taxId;
+  $("#formalProductName").textContent = productName;
+  $("#formalSpec").textContent = quoteSpecText(result);
+  $("#formalQuantity").textContent = quoteQuantityText(result);
+  $("#formalUnitPrice").textContent = `${money(result.customerPrice, 2)} / ${quoteUnitText()}`;
+  $("#formalTotal").textContent = money(quoteAmount, 2);
+  $("#formalItemNotes").textContent = itemNotes;
+  $("#formalTotalAmount").textContent = money(quoteAmount, 2);
+  $("#formalDelivery").textContent = delivery;
+  $("#formalDestination").textContent = customerName;
+  $("#formalSales").textContent = sales;
 }
 
 function buildHistoryRecord() {
@@ -400,7 +481,7 @@ function saveToHistory() {
 
 function applySuggestedPrice() {
   const result = calculate();
-  state.customerPrice = result.suggestedPrice > 0 ? Number(result.suggestedPrice.toFixed(2)) : "";
+  state.customerPrice = result.suggestedPrice > 0 ? ceilMoney(result.suggestedPrice, 2) : "";
   saveState();
   renderFields();
   renderResults();

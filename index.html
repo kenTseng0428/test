@@ -44,7 +44,7 @@
             <button type="button" id="saveQuote"><span>▣</span>儲存</button>
             <button type="button" id="printQuote"><span>▤</span>列印／匯出PDF</button>
           </nav>
-          <em>Version 1.03</em>
+          <em>Version 1.04</em>
           <label class="print-mode"><input id="internalPrint" type="checkbox" /> 內部版</label>
         </section>
       </header>
@@ -133,7 +133,6 @@
               </select>
             </label>
             <label><span>損耗率 (%)</span><input data-field="lossRate" type="number" step="0.1" /></label>
-            <label><span>目標毛利率 (%)</span><input data-field="targetMargin" type="number" step="0.1" /></label>
           </div>
 
           <div class="sub-heading">
@@ -275,6 +274,92 @@
             <li>以上價格為本月適用牌價，次月請留意更新。</li>
           </ul>
         </aside>
+      </section>
+
+      <section class="formal-quote-sheet" aria-label="正式報價單">
+        <header class="formal-header">
+          <div>
+            <h2>安可包裝企業有限公司</h2>
+            <p>ENCORE PACKAGING ENTERPRISE CO., LTD.</p>
+          </div>
+          <div class="formal-meta">
+            <span>報價單號：<strong id="formalQuoteNo"></strong></span>
+            <span>報價日期：<strong id="formalQuoteDate"></strong></span>
+          </div>
+        </header>
+
+        <section class="formal-customer-grid">
+          <div><span>客戶名稱：</span><strong id="formalCustomerName"></strong></div>
+          <div><span>公司地址：</span><strong>新北市中和區中山路二段604號</strong></div>
+          <div><span>聯繫人員：</span><strong id="formalContact"></strong></div>
+          <div><span>公司信箱：</span><strong>ENCORE@MS11.HINET.NET</strong></div>
+          <div><span>客戶電話：</span><strong id="formalPhone"></strong></div>
+          <div><span>公司電話：</span><strong>(02)-2221-6093</strong></div>
+          <div><span>客戶統編：</span><strong id="formalTaxId"></strong></div>
+          <div><span>公司傳真：</span><strong>(02)-2223-5461</strong></div>
+        </section>
+
+        <h1 class="formal-title">產 品 報 價 單</h1>
+
+        <table class="formal-items">
+          <thead>
+            <tr>
+              <th>品項</th>
+              <th>品名</th>
+              <th>規格</th>
+              <th>數量</th>
+              <th>單價</th>
+              <th>總價</th>
+              <th>圖形 / 備註</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td id="formalProductName"></td>
+              <td id="formalSpec"></td>
+              <td id="formalQuantity"></td>
+              <td id="formalUnitPrice"></td>
+              <td id="formalTotal"></td>
+              <td id="formalItemNotes"></td>
+            </tr>
+            <tr class="formal-empty-row">
+              <td colspan="7">(以下空白)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="formal-total">TOTAL AMOUNT(NTD): <strong id="formalTotalAmount"></strong></div>
+
+        <section class="formal-terms">
+          <strong>備註：</strong>
+          <ol>
+            <li>客製化商品請先支付40%訂金+版費跟刀模，出貨前會通知支付尾款再出貨，或是貨到收現。</li>
+            <li>袋子製作過程，數量會有士10%誤差值，實際出貨數量依工廠產出數為主。</li>
+            <li>製作印刷袋，請提供美工圖檔(AI檔)，如未能提供須另收取美工稿費。</li>
+            <li>報價單確認後請回簽或傳正式訂單。</li>
+            <li>因製版為凹版如製成則無法更改，如需更改，可另付版費並順延交期。</li>
+            <li>版保留有效期限為1年，超過1年以上未使用需視版材情況酌收費用。</li>
+            <li>如有違反著作權或印版權等法律相關刑責，概由委託方負責。</li>
+          </ol>
+        </section>
+
+        <footer class="formal-footer-grid">
+          <div>
+            <span>RATE / TAX</span><strong>未含5%營業稅</strong>
+            <span>DELIVERY</span><strong id="formalDelivery"></strong>
+            <span>VALIDITY</span><strong>本報價單有效期 30 天</strong>
+            <span>PAYMENT</span><strong>匯款or現金</strong>
+            <span>DESTINATION</span><strong id="formalDestination"></strong>
+          </div>
+          <div>
+            <span>收款帳戶</span><strong>安可包裝企業有限公司</strong>
+            <span>統一編號</span><strong>22291609</strong>
+            <span>開戶行</span><strong>008_華南銀行_積穗分行</strong>
+            <span>帳號</span><strong>1801-0002-5167</strong>
+            <span>OFFERED BY</span><strong id="formalSales"></strong>
+          </div>
+        </footer>
       </section>
 
       <footer class="app-footer">
