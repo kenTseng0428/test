@@ -333,6 +333,12 @@ textarea {
   font-weight: 650;
 }
 
+.panel-heading h2 small {
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .panel-heading em {
   color: #64748b;
   font-style: normal;
@@ -528,6 +534,15 @@ textarea {
   gap: 10px;
 }
 
+.price-table h3 {
+  margin: 0 0 4px;
+  color: var(--blue-dark);
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.1;
+  font-weight: 700;
+}
+
 .price-table .table-head {
   min-height: 27px;
   background: #f7fafc;
@@ -592,6 +607,11 @@ th:last-child {
 
 .cost-table td:first-child {
   font-weight: 600;
+}
+
+.cost-table .subtotal-row td {
+  background: #fff7ea;
+  font-weight: 700;
 }
 
 .cost-table tfoot td,

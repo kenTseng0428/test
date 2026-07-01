@@ -16,7 +16,6 @@
         <section class="title-area">
           <h1>安可包裝智慧報價系統</h1>
           <p>Smart Quotation System</p>
-          <strong>精準計算 · 快速報價 · 掌握利潤</strong>
         </section>
 
         <section class="quote-head">
@@ -40,7 +39,7 @@
             <span>報價日期</span>
             <input id="quoteDate" type="date" />
           </label>
-          <em>Version 1.01</em>
+          <em>Version 1.02</em>
         </section>
       </header>
 
@@ -182,11 +181,12 @@
 
         <section class="panel price-panel">
           <div class="panel-heading">
-            <span>5</span>
-            <h2>本月原料牌價</h2>
+            <span>4</span>
+            <h2>成本參數設定 <small>（本月）</small></h2>
           </div>
           <div class="price-tables">
             <div class="price-table">
+              <h3>原料</h3>
               <div class="table-head"><span>材料</span><span>單價 (元/KG)</span></div>
               <label><span>透明</span><input data-param="transparentPrice" type="number" step="0.1" /></label>
               <label><span>乳白</span><input data-param="milkWhitePrice" type="number" step="0.1" /></label>
@@ -194,6 +194,7 @@
               <label><span>特殊色</span><input data-param="specialColorPrice" type="number" step="0.1" /></label>
             </div>
             <div class="price-table">
+              <h3>加工</h3>
               <div class="table-head"><span>項目</span><span>單價</span></div>
               <label><span>版費</span><input data-param="plateFee" type="number" step="1" /></label>
               <label><span>印刷費 (元/KG/色)</span><input data-param="printFeePerKgColor" type="number" step="0.1" /></label>
@@ -261,7 +262,7 @@
           <h2>重要提醒</h2>
           <ul>
             <li>印刷計算重量未達 200KG 時，仍以 200KG 計算印刷費。</li>
-            <li>原料成本使用總重量 × (1 + 損耗率) 計算。</li>
+            <li>損耗成本以原料、印刷、封口加工的製造成本小計計算。</li>
             <li>以上價格為本月適用牌價，次月請留意更新。</li>
           </ul>
         </aside>
@@ -269,7 +270,7 @@
 
       <footer class="app-footer">
         <span>© 2026 Encore Packaging Co., Ltd. All rights reserved.</span>
-        <span>Version 1.01</span>
+        <span>Version 1.02</span>
       </footer>
       <div id="toast" role="status" aria-live="polite"></div>
     </main>

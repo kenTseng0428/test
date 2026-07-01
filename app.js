@@ -1,4 +1,4 @@
-const storageKey = "peQuoteSystemStateV101";
+const storageKey = "peQuoteSystemStateV102";
 const historyKey = "historyQuotes";
 
 const defaultParams = {
@@ -145,14 +145,15 @@ function calculate() {
     : 0;
   const pcsPerKgFloor = pcsPerKg > 0 ? Math.max(1, Math.floor(pcsPerKg)) : 0;
   const totalWeight = pcsPerKgFloor > 0 ? quantity / pcsPerKgFloor : 0;
-  const lossWeight = totalWeight * (1 + lossRate / 100);
   const printWeight = Math.max(totalWeight, numberValue(state.params.minPrintKg));
-  const materialCost = lossWeight * selectedMaterialPrice();
+  const materialCost = totalWeight * selectedMaterialPrice();
   const printCost = printWeight * numberValue(state.params.printFeePerKgColor) * printColors;
   const sealCost = state.sealMode === "kg"
     ? totalWeight * numberValue(state.params.sealFeePerKg)
     : quantity * numberValue(state.params.sealFeePerPcs);
-  const baseSubtotal = materialCost + printCost + numberValue(state.params.plateFee) + sealCost;
+  const manufacturingSubtotal = materialCost + printCost + sealCost;
+  const lossCost = manufacturingSubtotal * (lossRate / 100);
+  const baseSubtotal = manufacturingSubtotal + lossCost + numberValue(state.params.plateFee);
   const enabledExtraCosts = state.extraCosts.filter((row) => row.enabled !== false);
   const extraSubtotal = enabledExtraCosts.reduce((sum, row) => sum + numberValue(row.amount), 0);
   const grandTotal = baseSubtotal + extraSubtotal;
@@ -169,11 +170,12 @@ function calculate() {
     pcsPerKg,
     pcsPerKgFloor,
     totalWeight,
-    lossWeight,
     printWeight,
     materialCost,
     printCost,
     sealCost,
+    manufacturingSubtotal,
+    lossCost,
     baseSubtotal,
     extraSubtotal,
     grandTotal,
@@ -255,14 +257,16 @@ function renderResults() {
     : `${money(state.quantity, 0)} PCS × ${state.params.sealFeePerPcs} 元/PCS`;
 
   const rows = [
-    ["原料成本", `總重量 ${money(result.totalWeight, 1)} KG × (1 + ${numberValue(state.lossRate).toFixed(1)}%) × ${selectedMaterialPrice()} 元/KG (${materialLabel()})`, result.materialCost],
-    ["印刷成本", `${money(result.printWeight, 1)} KG × ${state.params.printFeePerKgColor} 元/KG/色 × ${state.printColors} 色`, result.printCost],
-    ["版稿費", "固定收費", state.params.plateFee],
-    ["封口加工費", sealDesc, result.sealCost]
+    ["原料成本", `總重量 ${money(result.totalWeight, 1)} KG × ${selectedMaterialPrice()} 元/KG (${materialLabel()})`, result.materialCost, ""],
+    ["印刷成本", `${money(result.printWeight, 1)} KG × ${state.params.printFeePerKgColor} 元/KG/色 × ${state.printColors} 色`, result.printCost, ""],
+    ["封口加工費", sealDesc, result.sealCost, ""],
+    ["製造成本小計", "原料 + 印刷 + 封口加工", result.manufacturingSubtotal, "subtotal-row"],
+    ["損耗成本", `製造成本小計 × ${numberValue(state.lossRate).toFixed(1)}%`, result.lossCost, ""],
+    ["版費", "固定收費", state.params.plateFee, ""]
   ];
 
-  $("#costRows").innerHTML = rows.map(([name, desc, amount]) => `
-    <tr>
+  $("#costRows").innerHTML = rows.map(([name, desc, amount, className]) => `
+    <tr class="${className}">
       <td>${escapeHtml(name)}</td>
       <td>${escapeHtml(desc)}</td>
       <td>${money(amount, 1)}</td>
@@ -420,6 +424,25 @@ function bindEvents() {
     state[row.dataset.kind][Number(row.dataset.index)][input.dataset.dynamicKey] = input.value;
     saveState();
     renderResults();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    const input = event.target;
+    if (!input.matches("input:not([type='checkbox']), select, textarea")) return;
+    if (input.tagName === "TEXTAREA") return;
+
+    const fields = $$("input:not([type='hidden']):not([type='checkbox']), select, textarea")
+      .filter((field) => !field.disabled && field.offsetParent !== null);
+    const currentIndex = fields.indexOf(input);
+    if (currentIndex === -1) return;
+
+    event.preventDefault();
+    const next = fields[(currentIndex + 1) % fields.length];
+    next.focus();
+    if (typeof next.select === "function" && next.tagName !== "SELECT") {
+      next.select();
+    }
   });
 
   $("#addCustomField").addEventListener("click", () => {
