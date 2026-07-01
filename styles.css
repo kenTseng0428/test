@@ -42,7 +42,7 @@ textarea {
 
 .app-header {
   display: grid;
-  grid-template-columns: 260px minmax(360px, 1fr) minmax(650px, 1.5fr);
+  grid-template-columns: 260px minmax(300px, 0.72fr) minmax(840px, 1.7fr);
   align-items: center;
   gap: 16px;
   min-height: 76px;
@@ -93,12 +93,12 @@ textarea {
 
 .quote-head {
   display: grid;
-  grid-template-columns: minmax(230px, 1.1fr) minmax(190px, 0.9fr) minmax(150px, 0.75fr) auto;
+  grid-template-columns: minmax(150px, 0.95fr) minmax(170px, 1fr) minmax(150px, 0.92fr) auto auto auto;
   align-items: end;
-  gap: 10px;
+  gap: 8px;
 }
 
-.quote-head span {
+.quote-head > label > span {
   display: block;
   margin-bottom: 5px;
   color: #1f2937;
@@ -120,9 +120,12 @@ textarea {
 }
 
 .quote-head em {
-  align-self: center;
+  align-self: end;
   justify-self: end;
-  padding: 5px 9px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 9px;
   border: 1px solid #b9ddfb;
   border-radius: 9px;
   color: var(--blue-dark);
@@ -162,13 +165,12 @@ textarea {
 
 .summary-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(190px, 1fr)) minmax(445px, 1.35fr);
+  grid-template-columns: repeat(4, minmax(190px, 1fr));
   gap: 8px;
   margin: 8px 0;
 }
 
 .metric-card,
-.toolbar,
 .panel {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -179,9 +181,9 @@ textarea {
 .metric-card {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 18px;
   min-height: 66px;
-  padding: 10px 18px;
+  padding: 10px 24px;
 }
 
 .metric-card span {
@@ -203,26 +205,25 @@ textarea {
 }
 
 .icon-svg {
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
   fill: none;
   stroke: var(--blue);
-  stroke-width: 2.1;
+  stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.toolbar {
+.header-actions {
   display: grid;
-  grid-template-columns: repeat(3, minmax(126px, 1fr)) 72px;
+  grid-template-columns: repeat(3, auto);
   align-items: center;
-  gap: 8px;
-  min-height: 66px;
-  padding: 10px 12px;
+  gap: 6px;
+  align-self: end;
 }
 
-.toolbar button,
+.header-actions button,
 .plus-button,
 .margin-tools button {
   border: 1px solid transparent;
@@ -231,24 +232,18 @@ textarea {
   font-weight: 600;
 }
 
-.toolbar button {
-  height: 36px;
-  padding: 0 10px;
+.header-actions button {
+  height: 34px;
+  padding: 0 13px;
   color: #fff;
   background: linear-gradient(180deg, #1a93df, #0876bd);
   font-size: 13px;
   white-space: nowrap;
 }
 
-.toolbar button span {
+.header-actions button span {
   margin-right: 5px;
   font-size: 16px;
-}
-
-.toolbar .ghost {
-  color: var(--blue-dark);
-  background: #fff;
-  border-color: var(--line);
 }
 
 .print-mode {
@@ -258,6 +253,8 @@ textarea {
   color: #45576a;
   font-size: 12px;
   white-space: nowrap;
+  align-self: end;
+  height: 34px;
 }
 
 .print-mode input {
@@ -467,6 +464,17 @@ textarea:focus {
   font-weight: 600;
 }
 
+.quote-table select {
+  background: var(--input);
+  text-align-last: right;
+}
+
+.quote-table .price-input-large {
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 700;
+}
+
 .green {
   color: var(--green);
 }
@@ -654,6 +662,14 @@ th:last-child {
   padding: 5px 8px;
 }
 
+.extra-unit-impact {
+  margin: 7px 2px 0;
+  color: #45617e;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 650;
+}
+
 .row-actions {
   white-space: nowrap;
 }
@@ -777,10 +793,6 @@ th:last-child {
     grid-template-columns: repeat(4, 1fr);
   }
 
-  .toolbar {
-    grid-column: 1 / -1;
-  }
-
   .layout-grid {
     grid-template-columns: minmax(360px, 0.8fr) minmax(520px, 1.2fr);
     grid-template-areas:
@@ -824,12 +836,12 @@ th:last-child {
     border-right: 0;
   }
 
-  .toolbar {
-    grid-template-columns: 1fr 1fr;
+  .header-actions {
+    grid-template-columns: 1fr 1fr 1fr;
   }
 
   .print-mode {
-    grid-column: 1 / -1;
+    justify-content: flex-start;
   }
 }
 
@@ -843,7 +855,7 @@ th:last-child {
     padding: 0;
   }
 
-  .toolbar,
+  .header-actions,
   .plus-button,
   .icon-button,
   .price-panel,
@@ -863,7 +875,7 @@ th:last-child {
 
   .panel,
   .metric-card,
-  .toolbar {
+  .header-actions {
     box-shadow: none;
   }
 }

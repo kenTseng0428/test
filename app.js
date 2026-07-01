@@ -1,4 +1,4 @@
-const storageKey = "peQuoteSystemStateV102";
+const storageKey = "peQuoteSystemStateV103";
 const historyKey = "historyQuotes";
 
 const defaultParams = {
@@ -26,6 +26,7 @@ const defaults = {
   sealMode: "kg",
   lossRate: 7,
   targetMargin: 15,
+  quoteMode: "pcs",
   customerPrice: 8.23,
   notes: "",
   params: defaultParams,
@@ -137,6 +138,7 @@ function calculate() {
   const lossRate = numberValue(state.lossRate);
   const customerPriceInput = numberValue(state.customerPrice);
   const targetMargin = numberValue(state.targetMargin);
+  const quoteMode = state.quoteMode === "kg" ? "kg" : "pcs";
 
   const widthIn = widthCm / 2.54;
   const lengthIn = lengthCm / 2.54;
@@ -157,11 +159,14 @@ function calculate() {
   const enabledExtraCosts = state.extraCosts.filter((row) => row.enabled !== false);
   const extraSubtotal = enabledExtraCosts.reduce((sum, row) => sum + numberValue(row.amount), 0);
   const grandTotal = baseSubtotal + extraSubtotal;
-  const unitCost = quantity > 0 ? baseSubtotal / quantity : 0;
+  const unitDivisor = quoteMode === "kg" ? totalWeight : quantity;
+  const totalProfitDivisor = quoteMode === "kg" ? totalWeight : quantity;
+  const unitCost = unitDivisor > 0 ? baseSubtotal / unitDivisor : 0;
+  const extraUnitImpact = unitDivisor > 0 ? extraSubtotal / unitDivisor : 0;
   const suggestedPrice = targetMargin >= 100 ? unitCost : unitCost / (1 - targetMargin / 100);
   const customerPrice = customerPriceInput > 0 ? customerPriceInput : suggestedPrice;
   const unitProfit = customerPrice - unitCost;
-  const totalProfit = unitProfit * quantity;
+  const totalProfit = unitProfit * totalProfitDivisor;
   const margin = customerPrice > 0 ? (unitProfit / customerPrice) * 100 : 0;
 
   return {
@@ -178,7 +183,9 @@ function calculate() {
     lossCost,
     baseSubtotal,
     extraSubtotal,
+    extraUnitImpact,
     grandTotal,
+    unitDivisor,
     unitCost,
     suggestedPrice,
     customerPrice,
@@ -238,6 +245,20 @@ function extraCostOptions(selected) {
 
 function renderResults() {
   const result = calculate();
+  const isKgMode = state.quoteMode === "kg";
+  const unitName = isKgMode ? "公斤" : "袋子";
+  const unitText = isKgMode ? "元/KG" : "元/PCS";
+  const profitLabel = isKgMode ? "每公斤利潤" : "每個利潤";
+  const extraImpactText = isKgMode
+    ? `額外成本換算：每 KG +${money(result.extraUnitImpact, 2)} 元`
+    : `額外成本換算：每個 +${money(result.extraUnitImpact, 2)} 元`;
+
+  $("#kpiCostLabel").textContent = `${unitName}成本 (${unitText})`;
+  $("#kpiPriceLabel").textContent = `建議售價 (${unitText})`;
+  $("#unitCostLabel").textContent = `${unitName}成本 (${unitText})`;
+  $("#customerPriceLabel").textContent = `客戶售價 (${unitText})`;
+  $("#unitProfitLabel").textContent = profitLabel;
+
   $("#kpiWeight").textContent = money(result.totalWeight, 1);
   $("#kpiCost").textContent = money(result.unitCost, 2);
   $("#kpiPrice").textContent = money(result.suggestedPrice, 2);
@@ -246,10 +267,12 @@ function renderResults() {
   $("#pcsPerKg").textContent = money(result.pcsPerKg, 1);
   $("#totalWeight").textContent = money(result.totalWeight, 1);
   $("#unitCost").textContent = money(result.unitCost, 2);
+  $("#unitProfit").textContent = money(result.unitProfit, 2);
   $("#totalProfit").textContent = money(result.totalProfit, 1);
   $("#actualMargin").textContent = pct(result.margin);
   $("#baseSubtotal").textContent = money(result.baseSubtotal, 1);
   $("#extraSubtotal").textContent = money(result.extraSubtotal, 1);
+  $("#extraUnitImpact").textContent = extraImpactText;
   $("#grandTotal").textContent = money(result.grandTotal, 1);
 
   const sealDesc = state.sealMode === "kg"
@@ -291,6 +314,14 @@ function escapeHtml(value) {
 function syncField(key, value) {
   state[key] = value;
   if (key === "targetMargin") renderMarginButtons();
+  if (key === "quoteMode") {
+    const result = calculate();
+    state.customerPrice = result.suggestedPrice > 0 ? Number(result.suggestedPrice.toFixed(2)) : "";
+    saveState();
+    renderFields();
+    renderResults();
+    return;
+  }
   saveState();
   renderResults();
 }
@@ -314,6 +345,7 @@ function blankQuoteData({ keepQuoteIdentity }) {
     sealMode: "pcs",
     lossRate: "",
     targetMargin: "",
+    quoteMode: "pcs",
     customerPrice: "",
     notes: "",
     params: preservedParams,
@@ -352,6 +384,7 @@ function buildHistoryRecord() {
     unitCost: result.unitCost,
     customerPrice: result.customerPrice,
     margin: result.margin,
+    quoteMode: state.quoteMode,
     totalCost: result.grandTotal,
     extraCosts: clone(state.extraCosts),
     notes: state.notes

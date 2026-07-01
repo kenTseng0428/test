@@ -39,7 +39,13 @@
             <span>報價日期</span>
             <input id="quoteDate" type="date" />
           </label>
-          <em>Version 1.02</em>
+          <nav class="header-actions" aria-label="報價操作">
+            <button type="button" id="newQuote"><span>+</span>新增</button>
+            <button type="button" id="saveQuote"><span>▣</span>儲存</button>
+            <button type="button" id="printQuote"><span>▤</span>列印／匯出PDF</button>
+          </nav>
+          <em>Version 1.03</em>
+          <label class="print-mode"><input id="internalPrint" type="checkbox" /> 內部版</label>
         </section>
       </header>
 
@@ -59,7 +65,7 @@
             <path d="M24 13v22M30 18c-2-2-9-3-10 2-2 8 11 5 9 12-1 4-8 4-11 1" />
           </svg>
           <div>
-            <span>每個成本 (元/PCS)</span>
+            <span id="kpiCostLabel">袋子成本 (元/PCS)</span>
             <strong id="kpiCost">0.00</strong>
           </div>
         </article>
@@ -69,7 +75,7 @@
             <circle cx="34" cy="14" r="2.5" />
           </svg>
           <div>
-            <span>建議售價 (元/PCS)</span>
+            <span id="kpiPriceLabel">建議售價 (元/PCS)</span>
             <strong id="kpiPrice">0.00</strong>
           </div>
         </article>
@@ -82,12 +88,6 @@
             <strong id="kpiMargin">0.0%</strong>
           </div>
         </article>
-        <nav class="toolbar" aria-label="報價操作">
-          <button type="button" id="newQuote"><span>+</span>新增空白報價</button>
-          <button type="button" id="saveQuote" class="ghost"><span>▣</span>儲存到歷史報價</button>
-          <button type="button" id="printQuote" class="ghost"><span>▤</span>列印／匯出PDF</button>
-          <label class="print-mode"><input id="internalPrint" type="checkbox" /> 內部版</label>
-        </nav>
       </section>
 
       <section class="layout-grid">
@@ -172,8 +172,16 @@
             </div>
           </div>
           <div class="info-table quote-table">
-            <div><span>每個成本 (元/PCS)</span><strong id="unitCost">0.00</strong></div>
-            <div><span>客戶售價 (元/PCS)</span><input data-field="customerPrice" type="number" step="0.01" /></div>
+            <div>
+              <span>報價模式</span>
+              <select data-field="quoteMode">
+                <option value="pcs">按袋數（元/PCS）</option>
+                <option value="kg">按重量（元/KG）</option>
+              </select>
+            </div>
+            <div><span id="unitCostLabel">袋子成本 (元/PCS)</span><strong id="unitCost">0.00</strong></div>
+            <div><span id="customerPriceLabel">客戶售價 (元/PCS)</span><input class="price-input-large" data-field="customerPrice" type="number" step="0.01" /></div>
+            <div><span id="unitProfitLabel">每個利潤</span><strong id="unitProfit" class="green">0.00</strong></div>
             <div><span>本單預估利潤</span><strong id="totalProfit" class="green">0.0</strong></div>
             <div><span>毛利率 (%)</span><strong id="actualMargin" class="green">0.0%</strong></div>
           </div>
@@ -251,6 +259,7 @@
               </tr>
             </tfoot>
           </table>
+          <p id="extraUnitImpact" class="extra-unit-impact">額外成本換算：每個 +0.00 元</p>
 
           <div class="grand-total">
             <span>總成本 <small>(含額外成本)</small></span>
@@ -270,7 +279,6 @@
 
       <footer class="app-footer">
         <span>© 2026 Encore Packaging Co., Ltd. All rights reserved.</span>
-        <span>Version 1.02</span>
       </footer>
       <div id="toast" role="status" aria-live="polite"></div>
     </main>
