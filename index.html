@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>安可包裝智慧報價系統</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <section class="brand-area" aria-label="Encore Packaging">
+          <img src="./assets/encore-logo-clean.png" alt="Encore Packaging" />
+        </section>
+
+        <section class="title-area">
+          <h1>安可包裝智慧報價系統</h1>
+          <p>Smart Quotation System</p>
+          <strong>精準計算 · 快速報價 · 掌握利潤</strong>
+        </section>
+
+        <section class="quote-head">
+          <label class="bag-type-field">
+            <span>袋型選擇</span>
+            <div class="select-pill">
+              <b>PE</b>
+              <select data-field="bagType">
+                <option value="PE 平口袋">PE 平口袋</option>
+                <option value="PE 夾鏈袋">PE 夾鏈袋</option>
+                <option value="PE 手提袋">PE 手提袋</option>
+                <option value="PE 自訂袋型">PE 自訂袋型</option>
+              </select>
+            </div>
+          </label>
+          <label>
+            <span>報價編號</span>
+            <input id="quoteNo" type="text" />
+          </label>
+          <label>
+            <span>報價日期</span>
+            <input id="quoteDate" type="date" />
+          </label>
+          <em>Version 1.01</em>
+        </section>
+      </header>
+
+      <section class="summary-row" aria-label="報價摘要">
+        <article class="metric-card">
+          <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M24 8v31M11 17h26M16 17 8 33h16L16 17Zm16 0-8 16h16L32 17Z" />
+          </svg>
+          <div>
+            <span>總重量 (KG)</span>
+            <strong id="kpiWeight">0.0</strong>
+          </div>
+        </article>
+        <article class="metric-card">
+          <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
+            <circle cx="24" cy="24" r="17" />
+            <path d="M24 13v22M30 18c-2-2-9-3-10 2-2 8 11 5 9 12-1 4-8 4-11 1" />
+          </svg>
+          <div>
+            <span>每個成本 (元/PCS)</span>
+            <strong id="kpiCost">0.00</strong>
+          </div>
+        </article>
+        <article class="metric-card">
+          <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M10 25 25 10h13v13L23 38 10 25Z" />
+            <circle cx="34" cy="14" r="2.5" />
+          </svg>
+          <div>
+            <span>建議售價 (元/PCS)</span>
+            <strong id="kpiPrice">0.00</strong>
+          </div>
+        </article>
+        <article class="metric-card margin-card">
+          <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M8 39h32M12 39V27h6v12M22 39V20h6v19M32 39V12h6v27M13 19l8-6 7 5 10-10" />
+          </svg>
+          <div>
+            <span>毛利率 (%)</span>
+            <strong id="kpiMargin">0.0%</strong>
+          </div>
+        </article>
+        <nav class="toolbar" aria-label="報價操作">
+          <button type="button" id="newQuote"><span>+</span>新增空白報價</button>
+          <button type="button" id="saveQuote" class="ghost"><span>▣</span>儲存到歷史報價</button>
+          <button type="button" id="printQuote" class="ghost"><span>▤</span>列印／匯出PDF</button>
+          <label class="print-mode"><input id="internalPrint" type="checkbox" /> 內部版</label>
+        </nav>
+      </section>
+
+      <section class="layout-grid">
+        <section class="panel input-panel">
+          <div class="panel-heading">
+            <span>1</span>
+            <h2>用袋條件</h2>
+          </div>
+
+          <div class="form-table">
+            <label><span>袋寬 (cm)</span><input data-field="widthCm" type="number" step="0.1" /></label>
+            <label><span>袋長 (cm)</span><input data-field="lengthCm" type="number" step="0.1" /></label>
+            <label><span>厚度 (mm)</span><input data-field="thicknessMm" type="number" step="0.01" /></label>
+            <label>
+              <span>材料</span>
+              <select data-field="material">
+                <option value="transparent">透明</option>
+                <option value="milkWhite">乳白</option>
+                <option value="black">黑色</option>
+                <option value="specialColor">特殊色</option>
+              </select>
+            </label>
+            <label><span>數量 (PCS)</span><input data-field="quantity" type="number" step="1" /></label>
+            <label>
+              <span>印刷色數</span>
+              <select data-field="printColors">
+                <option value="0">0 色</option>
+                <option value="1">1 色</option>
+                <option value="2">2 色</option>
+                <option value="3">3 色</option>
+                <option value="4">4 色</option>
+                <option value="5">5 色</option>
+                <option value="6">6 色</option>
+                <option value="7">7 色</option>
+                <option value="8">8 色</option>
+              </select>
+            </label>
+            <label>
+              <span>封口計價方式</span>
+              <select data-field="sealMode">
+                <option value="pcs">單價計價 (元/PCS)</option>
+                <option value="kg">重量計價 (元/KG)</option>
+              </select>
+            </label>
+            <label><span>損耗率 (%)</span><input data-field="lossRate" type="number" step="0.1" /></label>
+            <label><span>目標毛利率 (%)</span><input data-field="targetMargin" type="number" step="0.1" /></label>
+          </div>
+
+          <div class="sub-heading">
+            <h3>自訂欄位</h3>
+            <button type="button" id="addCustomField" class="plus-button" title="新增欄位">+</button>
+          </div>
+          <div id="customFields" class="custom-table"></div>
+
+          <div class="sub-heading notes-heading">
+            <h3>備註</h3>
+          </div>
+          <textarea id="notes" rows="4" placeholder="可在此輸入備註..."></textarea>
+        </section>
+
+        <section class="panel production-panel">
+          <div class="panel-heading">
+            <span>2</span>
+            <h2>生產資訊</h2>
+          </div>
+          <div class="info-table compact-info">
+            <div><span>每公斤可做 (PCS)</span><strong id="pcsPerKg">0.0</strong></div>
+            <div class="highlight"><span>總重量 (KG)</span><strong id="totalWeight">0.0</strong></div>
+          </div>
+        </section>
+
+        <section class="panel quote-panel">
+          <div class="panel-heading quote-heading">
+            <span>4</span>
+            <h2>報價分析</h2>
+            <div class="margin-tools" aria-label="快速調整毛利率">
+              <button type="button" data-margin="15">15%</button>
+              <button type="button" data-margin="20">20%</button>
+              <button type="button" data-margin="25">25%</button>
+              <button type="button" data-margin="30">30%</button>
+              <button type="button" id="recalcPrice" title="依目標毛利率重算售價">↻</button>
+            </div>
+          </div>
+          <div class="info-table quote-table">
+            <div><span>每個成本 (元/PCS)</span><strong id="unitCost">0.00</strong></div>
+            <div><span>客戶售價 (元/PCS)</span><input data-field="customerPrice" type="number" step="0.01" /></div>
+            <div><span>本單預估利潤</span><strong id="totalProfit" class="green">0.0</strong></div>
+            <div><span>毛利率 (%)</span><strong id="actualMargin" class="green">0.0%</strong></div>
+          </div>
+        </section>
+
+        <section class="panel price-panel">
+          <div class="panel-heading">
+            <span>5</span>
+            <h2>本月原料牌價</h2>
+          </div>
+          <div class="price-tables">
+            <div class="price-table">
+              <div class="table-head"><span>材料</span><span>單價 (元/KG)</span></div>
+              <label><span>透明</span><input data-param="transparentPrice" type="number" step="0.1" /></label>
+              <label><span>乳白</span><input data-param="milkWhitePrice" type="number" step="0.1" /></label>
+              <label><span>黑色</span><input data-param="blackPrice" type="number" step="0.1" /></label>
+              <label><span>特殊色</span><input data-param="specialColorPrice" type="number" step="0.1" /></label>
+            </div>
+            <div class="price-table">
+              <div class="table-head"><span>項目</span><span>單價</span></div>
+              <label><span>版費</span><input data-param="plateFee" type="number" step="1" /></label>
+              <label><span>印刷費 (元/KG/色)</span><input data-param="printFeePerKgColor" type="number" step="0.1" /></label>
+              <label><span>封口加工費 (元/KG)</span><input data-param="sealFeePerKg" type="number" step="0.1" /></label>
+              <label><span>封口加工費 (元/PCS)</span><input data-param="sealFeePerPcs" type="number" step="0.01" /></label>
+              <label><span>印刷基本重量 (KG)</span><input data-param="minPrintKg" type="number" step="1" /></label>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel cost-panel internal-only">
+          <div class="panel-heading">
+            <span>3</span>
+            <h2>成本分析</h2>
+            <em>自動計算</em>
+          </div>
+          <table class="cost-table">
+            <thead>
+              <tr>
+                <th>項目</th>
+                <th>計算說明</th>
+                <th>金額 (元)</th>
+              </tr>
+            </thead>
+            <tbody id="costRows"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2">小計</td>
+                <td id="baseSubtotal">0.0</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div class="extra-header">
+            <h3>額外成本項目</h3>
+            <button type="button" id="addExtraCost" class="plus-button" title="新增額外成本">+</button>
+          </div>
+          <table class="extra-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>項目名稱</th>
+                <th>計算方式</th>
+                <th>金額 (元)</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="extraCosts"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3">額外成本小計</td>
+                <td id="extraSubtotal">0.0</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div class="grand-total">
+            <span>總成本 <small>(含額外成本)</small></span>
+            <strong id="grandTotal">0.0</strong>
+          </div>
+        </section>
+
+        <aside class="panel reminder-panel">
+          <h2>重要提醒</h2>
+          <ul>
+            <li>印刷計算重量未達 200KG 時，仍以 200KG 計算印刷費。</li>
+            <li>原料成本使用總重量 × (1 + 損耗率) 計算。</li>
+            <li>以上價格為本月適用牌價，次月請留意更新。</li>
+          </ul>
+        </aside>
+      </section>
+
+      <footer class="app-footer">
+        <span>© 2026 Encore Packaging Co., Ltd. All rights reserved.</span>
+        <span>Version 1.01</span>
+      </footer>
+      <div id="toast" role="status" aria-live="polite"></div>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
