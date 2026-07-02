@@ -346,13 +346,15 @@ textarea {
 .form-table,
 .info-table,
 .custom-table,
-.price-table {
+.price-table,
+.tier-table {
   border-top: 1px solid var(--line-soft);
 }
 
 .form-table label,
 .info-table div,
 .custom-row,
+.tier-row,
 .price-table label,
 .table-head {
   display: grid;
@@ -365,6 +367,7 @@ textarea {
 .form-table span,
 .info-table span,
 .custom-row .label-input,
+.tier-row strong,
 .price-table span,
 .table-head span {
   padding: 0 7px;
@@ -394,7 +397,9 @@ textarea:focus {
 .form-table select,
 .info-table input,
 .price-table input,
+.price-table select,
 .custom-row input:not(.label-input),
+.tier-row input,
 .extra-table input,
 .extra-table select,
 .quote-table input {
@@ -403,6 +408,7 @@ textarea:focus {
 }
 
 .form-table select,
+.price-table select,
 .extra-table select,
 .select-pill select {
   text-align-last: right;
@@ -476,6 +482,29 @@ textarea:focus {
   font-weight: 700;
 }
 
+.quote-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.quote-actions button {
+  height: 34px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: #fff;
+  background: linear-gradient(180deg, #1a93df, #0876bd);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.quote-actions .ghost {
+  color: var(--blue-dark);
+  background: #fff;
+  border-color: var(--line);
+}
+
 .green {
   color: var(--green);
 }
@@ -512,6 +541,38 @@ textarea:focus {
 
 .custom-row {
   grid-template-columns: minmax(104px, 0.76fr) minmax(140px, 1.18fr) 32px;
+}
+
+.tier-table::before {
+  content: "數量 / 重量 / 成本 / 建議 / 客戶 / 金額 / 利潤 / 毛利";
+  display: block;
+  padding: 5px 7px;
+  border-bottom: 1px solid var(--line-soft);
+  color: #45617e;
+  background: #f7fafc;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tier-table {
+  overflow-x: auto;
+}
+
+.tier-row {
+  grid-template-columns: minmax(82px, 0.9fr) minmax(58px, 0.62fr) minmax(58px, 0.62fr) minmax(58px, 0.62fr) minmax(76px, 0.78fr) minmax(82px, 0.9fr) minmax(76px, 0.8fr) minmax(54px, 0.6fr) 30px;
+  min-width: 620px;
+}
+
+.tier-row strong,
+.tier-row span {
+  justify-self: end;
+  padding: 0 7px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 .icon-button {
@@ -748,6 +809,42 @@ th:last-child {
   font-size: 12px;
 }
 
+.quote-items-panel {
+  margin-top: 8px;
+}
+
+.quote-items-table th:first-child {
+  width: 58px;
+}
+
+.quote-items-table th:nth-child(2) {
+  width: 180px;
+}
+
+.quote-items-table th:nth-child(4) {
+  width: 150px;
+}
+
+.quote-items-table th:last-child {
+  width: 64px;
+  text-align: center;
+}
+
+.quote-items-table td:last-child {
+  text-align: center;
+}
+
+.quote-items-table small {
+  color: #617083;
+  font-size: 12px;
+}
+
+.empty-cell {
+  height: 46px;
+  color: #668099;
+  text-align: center !important;
+}
+
 .formal-quote-sheet {
   display: none;
 }
@@ -865,6 +962,7 @@ th:last-child {
   .icon-button,
   .price-panel,
   .reminder-panel,
+  .quote-items-panel,
   .app-footer,
   #toast {
     display: none !important;
@@ -873,6 +971,7 @@ th:last-child {
   body:not(.print-internal) .app-header,
   body:not(.print-internal) .summary-row,
   body:not(.print-internal) .layout-grid,
+  body:not(.print-internal) .quote-items-panel,
   body:not(.print-internal) .app-footer {
     display: none !important;
   }
@@ -1014,6 +1113,8 @@ th:last-child {
   }
 
   .formal-total {
+    display: grid;
+    gap: 4px;
     margin: 12px 0;
     text-align: right;
     font-size: 15px;
