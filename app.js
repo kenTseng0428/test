@@ -517,6 +517,7 @@ function renderResults() {
 
   $("#kpiCostLabel").textContent = `${unitName}成本 (${unitText})`;
   $("#kpiPriceLabel").textContent = `建議售價 (${unitText})`;
+  $("#kpiProfitLabel").textContent = isKgMode ? "毛利 (元/KG)" : "毛利 (元/PCS)";
   $("#unitCostLabel").textContent = `${unitName}成本 (${unitText})`;
   $("#customerPriceLabel").textContent = `客戶售價 (${unitText})`;
   $("#unitProfitLabel").textContent = profitLabel;
@@ -524,6 +525,7 @@ function renderResults() {
   $("#kpiWeight").textContent = money(result.totalWeight, 1);
   $("#kpiCost").textContent = money(result.unitCost, 2);
   $("#kpiPrice").textContent = money(result.suggestedPrice, 2);
+  $("#kpiProfit").textContent = money(result.unitProfit, 2);
   $("#kpiMargin").textContent = pct(result.margin);
 
   $("#pcsPerKg").textContent = money(result.pcsPerKg, 1);

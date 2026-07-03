@@ -6,6 +6,8 @@
   --muted: #617083;
   --line: #dbe7f2;
   --line-soft: #edf3f8;
+  --encore-blue: #27a9dd;
+  --encore-red: #c9002b;
   --blue: #1287d1;
   --blue-dark: #07679f;
   --input: #fff7e8;
@@ -43,22 +45,35 @@ textarea {
 .app-header {
   display: grid;
   grid-template-columns: 260px minmax(300px, 0.72fr) minmax(840px, 1.7fr);
+  grid-template-areas:
+    "brand title head"
+    "brand title tools";
   align-items: center;
-  gap: 16px;
-  min-height: 76px;
+  column-gap: 16px;
+  row-gap: 8px;
+  min-height: 124px;
   border-bottom: 1px solid var(--line);
-  padding-bottom: 6px;
+  padding-bottom: 10px;
 }
 
 .brand-area,
 .title-area {
-  min-height: 62px;
+  min-height: 104px;
   border-right: 1px solid var(--line);
+  align-self: stretch;
 }
 
 .brand-area {
   display: flex;
   align-items: center;
+  grid-area: brand;
+}
+
+.title-area {
+  grid-area: title;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .brand-area img {
@@ -77,10 +92,27 @@ textarea {
 }
 
 .title-area p {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   margin: 3px 0 0;
   color: #64748b;
   font-size: 16px;
   font-weight: 500;
+}
+
+.version-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 21px;
+  padding: 2px 8px;
+  border: 1px solid #b9ddfb;
+  border-radius: 999px;
+  color: var(--blue-dark);
+  background: #f5fbff;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .title-area strong {
@@ -93,7 +125,8 @@ textarea {
 
 .quote-head {
   display: grid;
-  grid-template-columns: minmax(150px, 0.95fr) minmax(170px, 1fr) minmax(150px, 0.92fr) auto auto auto;
+  grid-area: head;
+  grid-template-columns: minmax(150px, 0.95fr) minmax(170px, 1fr) minmax(150px, 0.92fr) auto auto;
   align-items: end;
   gap: 8px;
 }
@@ -117,22 +150,6 @@ textarea {
 .quote-head input {
   font-size: 14px;
   font-weight: 600;
-}
-
-.quote-head em {
-  align-self: end;
-  justify-self: end;
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 9px;
-  border: 1px solid #b9ddfb;
-  border-radius: 9px;
-  color: var(--blue-dark);
-  font-size: 13px;
-  font-style: normal;
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 .select-pill {
@@ -165,9 +182,10 @@ textarea {
 
 .summary-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(190px, 1fr));
+  grid-area: summary;
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
   gap: 8px;
-  margin: 8px 0;
+  margin: 0;
 }
 
 .metric-card,
@@ -181,33 +199,34 @@ textarea {
 .metric-card {
   display: flex;
   align-items: center;
-  gap: 18px;
-  min-height: 66px;
-  padding: 10px 24px;
+  gap: 10px;
+  min-height: 72px;
+  padding: 10px 14px;
 }
 
 .metric-card span {
   display: block;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .metric-card strong {
   display: block;
   margin-top: 2px;
-  font-size: 27px;
+  font-size: 24px;
   line-height: 1;
   font-weight: 700;
 }
 
+.profit-card strong,
 .margin-card strong {
-  color: var(--blue);
+  color: var(--green);
 }
 
 .icon-svg {
-  width: 46px;
-  height: 46px;
-  flex: 0 0 46px;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
   fill: none;
   stroke: var(--blue);
   stroke-width: 2.4;
@@ -263,10 +282,32 @@ textarea {
   accent-color: var(--blue);
 }
 
+.header-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  grid-area: tools;
+  min-height: 38px;
+}
+
+.header-secondary button {
+  height: 34px;
+  min-width: 118px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: #0f3760;
+  background: #fff;
+  cursor: default;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .layout-grid {
   display: grid;
   grid-template-columns: minmax(385px, 0.95fr) minmax(410px, 0.94fr) minmax(650px, 1.42fr);
   grid-template-areas:
+    "input summary summary"
     "input production cost"
     "input quote cost"
     "input price cost"
@@ -876,7 +917,8 @@ th:last-child {
     grid-template-columns: 250px minmax(360px, 1fr);
     grid-template-areas:
       "brand title"
-      "head head";
+      "head head"
+      "tools tools";
   }
 
   .brand-area {
@@ -891,13 +933,18 @@ th:last-child {
     grid-area: head;
   }
 
+  .header-secondary {
+    grid-area: tools;
+  }
+
   .summary-row {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, minmax(120px, 1fr));
   }
 
   .layout-grid {
     grid-template-columns: minmax(360px, 0.8fr) minmax(520px, 1.2fr);
     grid-template-areas:
+      "input summary"
       "input cost"
       "production cost"
       "quote cost"
@@ -924,6 +971,8 @@ th:last-child {
   .brand-area,
   .title-area,
   .quote-head,
+  .header-secondary,
+  .summary-row,
   .input-panel,
   .production-panel,
   .quote-panel,
@@ -958,6 +1007,7 @@ th:last-child {
   }
 
   .header-actions,
+  .header-secondary,
   .plus-button,
   .icon-button,
   .price-panel,

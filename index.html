@@ -15,7 +15,7 @@
 
         <section class="title-area">
           <h1>安可包裝智慧報價系統</h1>
-          <p>Smart Quotation System</p>
+          <p>Smart Quotation System <span class="version-badge">Version 1.06AB</span></p>
         </section>
 
         <section class="quote-head">
@@ -41,53 +41,71 @@
             <button type="button" id="saveQuote"><span>▣</span>儲存</button>
             <button type="button" id="printQuote"><span>▤</span>列印／匯出PDF</button>
           </nav>
-          <em>Version 1.06</em>
           <label class="print-mode"><input id="internalPrint" type="checkbox" /> 內部版</label>
         </section>
+
+        <nav class="header-secondary" aria-label="功能列">
+          <button type="button">客戶資訊</button>
+          <button type="button">成本參數</button>
+          <button type="button">歷史報價</button>
+        </nav>
       </header>
 
-      <section class="summary-row" aria-label="報價摘要">
-        <article class="metric-card">
-          <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
-            <path d="M24 8v31M11 17h26M16 17 8 33h16L16 17Zm16 0-8 16h16L32 17Z" />
-          </svg>
-          <div>
-            <span>總重量 (KG)</span>
-            <strong id="kpiWeight">0.0</strong>
-          </div>
-        </article>
-        <article class="metric-card">
-          <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
-            <circle cx="24" cy="24" r="17" />
-            <path d="M24 13v22M30 18c-2-2-9-3-10 2-2 8 11 5 9 12-1 4-8 4-11 1" />
-          </svg>
-          <div>
-            <span id="kpiCostLabel">袋子成本 (元/PCS)</span>
-            <strong id="kpiCost">0.00</strong>
-          </div>
-        </article>
-        <article class="metric-card">
-          <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
-            <path d="M10 25 25 10h13v13L23 38 10 25Z" />
-            <circle cx="34" cy="14" r="2.5" />
-          </svg>
-          <div>
-            <span id="kpiPriceLabel">建議售價 (元/PCS)</span>
-            <strong id="kpiPrice">0.00</strong>
-          </div>
-        </article>
-        <article class="metric-card margin-card">
-          <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
-            <path d="M8 39h32M12 39V27h6v12M22 39V20h6v19M32 39V12h6v27M13 19l8-6 7 5 10-10" />
-          </svg>
-          <div>
-            <span>毛利率 (%)</span>
-            <strong id="kpiMargin">0.0%</strong>
-          </div>
-        </article>
-      </section>
-
       <section class="layout-grid">
+        <section class="summary-row" aria-label="報價摘要">
+          <article class="metric-card">
+            <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
+              <path d="M24 8v31M11 17h26M16 17 8 33h16L16 17Zm16 0-8 16h16L32 17Z" />
+            </svg>
+            <div>
+              <span>總重量 (KG)</span>
+              <strong id="kpiWeight">0.0</strong>
+            </div>
+          </article>
+          <article class="metric-card">
+            <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
+              <circle cx="24" cy="24" r="17" />
+              <path d="M24 13v22M30 18c-2-2-9-3-10 2-2 8 11 5 9 12-1 4-8 4-11 1" />
+            </svg>
+            <div>
+              <span id="kpiCostLabel">袋子成本 (元/PCS)</span>
+              <strong id="kpiCost">0.00</strong>
+            </div>
+          </article>
+          <article class="metric-card">
+            <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
+              <path d="M10 25 25 10h13v13L23 38 10 25Z" />
+              <circle cx="34" cy="14" r="2.5" />
+            </svg>
+            <div>
+              <span id="kpiPriceLabel">建議售價 (元/PCS)</span>
+              <strong id="kpiPrice">0.00</strong>
+            </div>
+          </article>
+          <article class="metric-card profit-card">
+            <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
+              <path d="M12 36h24M16 30l6-8 6 5 8-13" />
+              <circle cx="16" cy="30" r="2" />
+              <circle cx="22" cy="22" r="2" />
+              <circle cx="28" cy="27" r="2" />
+              <circle cx="36" cy="14" r="2" />
+            </svg>
+            <div>
+              <span id="kpiProfitLabel">毛利 (元/PCS)</span>
+              <strong id="kpiProfit">0.00</strong>
+            </div>
+          </article>
+          <article class="metric-card margin-card">
+            <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
+              <path d="M8 39h32M12 39V27h6v12M22 39V20h6v19M32 39V12h6v27M13 19l8-6 7 5 10-10" />
+            </svg>
+            <div>
+              <span>毛利率 (%)</span>
+              <strong id="kpiMargin">0.0%</strong>
+            </div>
+          </article>
+        </section>
+
         <section class="panel input-panel">
           <div class="panel-heading">
             <span>1</span>
