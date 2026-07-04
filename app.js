@@ -400,7 +400,10 @@ function renderFields() {
   renderBagStyleOptions();
 
   $$("[data-field]").forEach((input) => {
-    input.value = state[input.dataset.field] ?? "";
+    const value = state[input.dataset.field] ?? "";
+    input.value = ["widthCm", "lengthCm"].includes(input.dataset.field) && value !== ""
+      ? numberValue(value).toFixed(1)
+      : value;
   });
 
   $$("[data-param]").forEach((input) => {
@@ -506,6 +509,128 @@ function extraCostOptions(selected) {
   return options.map((option) => `<option value="${option}" ${option === selected ? "selected" : ""}>${option}</option>`).join("");
 }
 
+function extraCostOptions(selected) {
+  const options = ["運費", "打樣費", "設計費", "其他"];
+  return options.map((option) => `<option value="${option}" ${option === selected ? "selected" : ""}>${option}</option>`).join("");
+}
+
+function percentText(amount, total) {
+  return total > 0 ? `${money((amount / total) * 100, 1)}%` : "0.0%";
+}
+
+function ensureCostPanelUi() {
+  const costTable = document.querySelector(".cost-table");
+  if (!costTable) return;
+
+  costTable.querySelector("thead").innerHTML = `
+    <tr>
+      <th>項目</th>
+      <th>金額 (元)</th>
+      <th>占比</th>
+      <th>說明</th>
+      <th class="cost-extra-action"></th>
+    </tr>
+  `;
+  costTable.querySelector("tfoot").innerHTML = `
+    <tr>
+      <td>總成本</td>
+      <td id="baseSubtotal">0.0</td>
+      <td>100%</td>
+      <td colspan="2"></td>
+    </tr>
+  `;
+
+  const addButton = $("#addExtraCost");
+  const actionCell = costTable.querySelector(".cost-extra-action");
+  if (addButton && actionCell && !actionCell.contains(addButton)) {
+    actionCell.appendChild(addButton);
+  }
+
+  const costRows = $("#costRows");
+  const extraRows = $("#extraCosts");
+  if (costRows && extraRows && extraRows.previousElementSibling !== costRows) {
+    costRows.after(extraRows);
+  }
+
+  if (!$("#costVisual")) {
+    costTable.insertAdjacentHTML("afterend", `
+      <div id="costVisual" class="cost-visual">
+        <div id="costDonut" class="cost-donut"><strong id="costDonutTotal">0</strong><span>元</span></div>
+        <ul id="costLegend" class="cost-legend"></ul>
+      </div>
+      <section class="smart-advice">
+        <div class="panel-heading compact-heading"><span>4</span><h2>智慧建議 (AI)</h2></div>
+        <div class="advice-grid">
+          <article class="advice-card material-advice"><b>材料建議</b><p id="materialAdviceText"></p><strong id="materialAdviceValue"></strong></article>
+          <article class="advice-card print-advice"><b>印刷建議</b><p id="printAdviceText"></p><strong id="printAdviceValue"></strong></article>
+          <article class="advice-card profit-advice"><b>利潤提醒</b><p id="profitAdviceText"></p><strong id="profitAdviceValue"></strong></article>
+        </div>
+      </section>
+    `);
+  }
+}
+
+function renderProductPreviewLabels() {
+  const width = money(numberValue(state.widthCm), 1);
+  const length = money(numberValue(state.lengthCm), 1);
+  const widthLabel = $("#previewWidthLabel");
+  const lengthLabel = $("#previewLengthLabel");
+  if (widthLabel) widthLabel.textContent = `${width} cm`;
+  if (lengthLabel) lengthLabel.textContent = `${length} cm`;
+}
+
+function renderIntegratedExtraCosts(total) {
+  const rows = state.extraCosts.map((row, index) => {
+    const amount = row.enabled === false ? 0 : numberValue(row.amount);
+    return `
+      <tr class="extra-cost-row" data-kind="extraCosts" data-index="${index}">
+        <td><select aria-label="額外成本項目" data-dynamic-key="label">${extraCostOptions(row.label)}</select></td>
+        <td><input aria-label="金額" data-dynamic-key="amount" type="number" step="1" value="${escapeHtml(row.amount)}" /></td>
+        <td data-extra-percent>${percentText(amount, total)}</td>
+        <td><input aria-label="說明" data-dynamic-key="method" value="${escapeHtml(row.method || "固定費用")}" /></td>
+        <td class="row-actions">
+          <button type="button" class="remove-button icon-button" title="移除額外成本" aria-label="移除額外成本">×</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  $("#extraCosts").innerHTML = rows;
+}
+
+function renderCostVisual(rows, total) {
+  const colors = ["#1976d2", "#42a55a", "#f4a622", "#8b57c8", "#21a6d7"];
+  const visibleRows = rows.filter((row) => row.amount > 0);
+  let cursor = 0;
+  const gradient = visibleRows.map((row, index) => {
+    const degrees = total > 0 ? (row.amount / total) * 360 : 0;
+    const start = cursor;
+    const end = cursor + degrees;
+    cursor = end;
+    return `${colors[index % colors.length]} ${start}deg ${end}deg`;
+  }).join(", ");
+
+  const donut = $("#costDonut");
+  if (donut) {
+    donut.style.background = gradient ? `conic-gradient(${gradient})` : "#edf3f8";
+  }
+  $("#costDonutTotal").textContent = money(total, 1);
+
+  $("#costLegend").innerHTML = visibleRows.map((row, index) => `
+    <li><i style="background:${colors[index % colors.length]}"></i><span>${escapeHtml(row.name)}</span><strong>${percentText(row.amount, total)}</strong></li>
+  `).join("");
+}
+
+function renderSmartAdvice(result) {
+  const thinner = Math.max(0.01, numberValue(state.thicknessMm) - 0.005);
+  $("#materialAdviceText").textContent = `若厚度改為 ${money(thinner, 3)}mm`;
+  $("#materialAdviceValue").textContent = "預估可降低材料成本";
+  $("#printAdviceText").textContent = numberValue(state.printColors) > 1 ? "可評估減少印刷色數" : "目前印刷設定較精簡";
+  $("#printAdviceValue").textContent = numberValue(state.printColors) > 1 ? "印刷成本可再優化" : "維持目前設定";
+  $("#profitAdviceText").textContent = `目前毛利率 ${pct(result.margin)}`;
+  $("#profitAdviceValue").textContent = result.margin >= 15 ? "利潤良好" : "低於目標毛利";
+}
+
 function renderResults() {
   const firstTier = state.quantityTiers[0] || { quantity: 0, customerPrice: "" };
   const result = calculateTier(firstTier);
@@ -514,6 +639,8 @@ function renderResults() {
   const unitText = isKgMode ? "元/KG" : "元/PCS";
   const profitLabel = isKgMode ? "每公斤利潤" : "每個利潤";
   const extraImpact = result.unitDivisor > 0 ? result.extraCost / result.unitDivisor : 0;
+  ensureCostPanelUi();
+  renderProductPreviewLabels();
 
   $("#kpiCostLabel").textContent = `${unitName}成本 (${unitText})`;
   $("#kpiPriceLabel").textContent = `建議售價 (${unitText})`;
@@ -570,6 +697,35 @@ function renderResults() {
       <td>${money(amount, 1)}</td>
     </tr>
   `).join("");
+
+  const analysisTotal = result.internalGrandTotal;
+  const costRowsV2 = [
+    { name: "原料成本", amount: result.materialCost, desc: `總重量 ${money(result.totalWeight, 1)} KG × ${selectedMaterialPrice()} 元/KG (${colorLabel()})` },
+    { name: "印刷成本", amount: result.printCost, desc: printDesc },
+    { name: "封口加工費", amount: result.sealCost, desc: sealDesc },
+    { name: "製袋成本小計", amount: result.manufacturingSubtotal, desc: "原料 + 印刷 + 封口加工", className: "subtotal-row" },
+    { name: "損耗成本", amount: result.lossCost, desc: `製袋成本小計 × ${numberValue(state.lossRate).toFixed(1)}%` },
+    { name: "版費", amount: result.plateCost, desc: plateDesc }
+  ];
+
+  $("#costRows").innerHTML = costRowsV2.map((row) => `
+    <tr class="${row.className || ""}">
+      <td>${escapeHtml(row.name)}</td>
+      <td>${money(row.amount, 1)}</td>
+      <td>${percentText(row.amount, analysisTotal)}</td>
+      <td>${escapeHtml(row.desc)}</td>
+      <td></td>
+    </tr>
+  `).join("");
+  renderIntegratedExtraCosts(analysisTotal);
+  renderCostVisual(
+    [
+      ...costRowsV2.filter((row) => row.name !== "製袋成本小計"),
+      { name: "額外成本", amount: result.extraCost, desc: "" }
+    ],
+    analysisTotal
+  );
+  renderSmartAdvice(result);
 
   updateTierComputedRows();
   renderFormalQuote();

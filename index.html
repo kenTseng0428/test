@@ -15,7 +15,7 @@
 
         <section class="title-area">
           <h1>安可包裝智慧報價系統</h1>
-          <p>Smart Quotation System <span class="version-badge">Version 1.06AB</span></p>
+          <p>Smart Quotation System <span class="version-badge">Version 1.06ABLR2</span></p>
         </section>
 
         <section class="quote-head">
@@ -48,6 +48,7 @@
           <button type="button">客戶資訊</button>
           <button type="button">成本參數</button>
           <button type="button">歷史報價</button>
+          <a href="#quoteItemsPanel">報價明細</a>
         </nav>
       </header>
 
@@ -106,7 +107,216 @@
           </article>
         </section>
 
-        <section class="panel input-panel">
+        <section class="panel input-panel" aria-label="Left">
+          <div class="left-card-heading">
+            <span>1</span>
+            <h2>產品規格設定</h2>
+          </div>
+
+          <section class="left-section">
+            <div class="left-section-header">
+              <span class="left-section-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M7 8V6a5 5 0 0 1 10 0v2" />
+                  <path d="M5 8h14l1 12H4L5 8Z" />
+                </svg>
+              </span>
+              <h2>包裝規格</h2>
+            </div>
+
+            <div class="left-field-grid">
+              <label>
+                <span>袋型</span>
+                <select data-field="bagStyle"></select>
+              </label>
+              <label>
+                <span>材質</span>
+                <select data-field="materialType">
+                  <option value="PE">PE</option>
+                  <option value="PP">PP</option>
+                  <option value="OPP">OPP</option>
+                  <option value="HDPE">HDPE</option>
+                </select>
+              </label>
+              <label class="left-size-row">
+                <span>尺寸（寬 x 長）</span>
+                <span class="left-size-inputs">
+                  <input data-field="widthCm" aria-label="袋寬" type="number" step="0.1" />
+                  <em>cm</em>
+                  <b aria-hidden="true">x</b>
+                  <input data-field="lengthCm" aria-label="袋長" type="number" step="0.1" />
+                  <em>cm</em>
+                </span>
+              </label>
+              <label>
+                <span>厚度</span>
+                <input data-field="thicknessMm" type="number" step="0.01" />
+              </label>
+              <label>
+                <span>封口方式</span>
+                <select data-field="sealType">
+                  <option value="normal">普封</option>
+                  <option value="side">側封</option>
+                </select>
+              </label>
+              <label>
+                <span>封口方向</span>
+                <select data-field="sealMode">
+                  <option value="pcs">按件計價</option>
+                  <option value="kg">按重計價</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="left-section">
+            <div class="left-section-header">
+              <span class="left-section-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="8" cy="8" r="3" />
+                  <circle cx="16" cy="8" r="3" />
+                  <circle cx="9" cy="16" r="3" />
+                  <path d="M15 15h4v4h-4z" />
+                </svg>
+              </span>
+              <h2>外觀設計</h2>
+            </div>
+
+            <div class="left-field-grid">
+              <label>
+                <span>袋身顏色</span>
+                <select data-field="colorType">
+                  <option value="transparent">透明 / 原色</option>
+                  <option value="milkWhite">白色</option>
+                  <option value="black">黑色</option>
+                  <option value="specialColor">特殊色</option>
+                </select>
+              </label>
+              <label class="conditional-field" data-visible-for="surface">
+                <span>破壞袋表面</span>
+                <select data-field="surface">
+                  <option value="glossy">亮面</option>
+                  <option value="matte">霧面</option>
+                </select>
+              </label>
+              <label>
+                <span>印刷方式</span>
+                <select data-field="printType">
+                  <option value="none">無印刷</option>
+                  <option value="single">單面印刷</option>
+                  <option value="double">雙面印刷</option>
+                </select>
+              </label>
+              <label>
+                <span>印刷範圍</span>
+                <select data-field="printColors">
+                  <option value="0">0 色</option>
+                  <option value="1">1 色</option>
+                  <option value="2">2 色</option>
+                  <option value="3">3 色</option>
+                  <option value="4">4 色</option>
+                  <option value="5">5 色</option>
+                  <option value="6">6 色</option>
+                  <option value="7">7 色</option>
+                  <option value="8">8 色</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="left-section">
+            <div class="left-section-header">
+              <span class="left-section-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="m14 7 3 3-7 7H7v-3l7-7Z" />
+                  <path d="M5 19h14" />
+                  <path d="m15 5 4 4" />
+                </svg>
+              </span>
+              <h2>加工選項</h2>
+            </div>
+
+            <div class="left-field-grid">
+              <label>
+                <span>手提</span>
+                <select data-field="hasHandle">
+                  <option value="none">無手提</option>
+                  <option value="yes">有手提</option>
+                </select>
+              </label>
+              <label>
+                <span>特殊加工</span>
+                <select class="left-static-select" aria-label="特殊加工">
+                  <option>-</option>
+                  <option>開孔</option>
+                  <option>吊卡</option>
+                  <option>特殊貼合</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="left-section preview-section">
+            <div class="left-section-header">
+              <span class="left-section-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M4 5h16v14H4z" />
+                  <path d="m4 15 4-4 3 3 4-5 5 6" />
+                </svg>
+              </span>
+              <h2>產品預覽</h2>
+            </div>
+
+            <div class="product-preview-placeholder">
+              <div class="bag-preview" aria-hidden="true">
+                <svg class="bag-preview-svg" viewBox="0 0 260 190">
+                  <defs>
+                    <radialGradient id="bagGlow" cx="50%" cy="50%" r="62%">
+                      <stop offset="0%" stop-color="#ffffff" />
+                      <stop offset="52%" stop-color="#eef3f7" />
+                      <stop offset="86%" stop-color="#ccd6df" />
+                      <stop offset="100%" stop-color="#f8fafc" />
+                    </radialGradient>
+                    <linearGradient id="bagEdge" x1="0%" x2="100%">
+                      <stop offset="0%" stop-color="#b8c4cf" stop-opacity="0.55" />
+                      <stop offset="22%" stop-color="#ffffff" stop-opacity="0.9" />
+                      <stop offset="78%" stop-color="#ffffff" stop-opacity="0.9" />
+                      <stop offset="100%" stop-color="#aebbc7" stop-opacity="0.55" />
+                    </linearGradient>
+                  </defs>
+                  <rect x="54" y="34" width="152" height="112" rx="3" fill="url(#bagGlow)" stroke="#aebbc7" />
+                  <path d="M62 42h136M62 49h136M62 56h136" stroke="url(#bagEdge)" stroke-width="2" />
+                  <path d="M66 40c12 31 12 72 0 100M194 40c-12 31-12 72 0 100" fill="none" stroke="#c2ccd6" stroke-width="2" opacity="0.8" />
+                  <path d="M74 136c27-20 84-20 112 0M78 50c26 17 78 17 104 0" fill="none" stroke="#d6dee6" stroke-width="2" opacity="0.75" />
+                  <path d="M54 158h152M54 153v10M206 153v10" stroke="#9fb0c0" stroke-width="1.5" />
+                  <text id="previewWidthLabel" x="130" y="180" text-anchor="middle">84 cm</text>
+                  <path d="M222 34v112M217 34h10M217 146h10" stroke="#9fb0c0" stroke-width="1.5" />
+                  <text id="previewLengthLabel" x="242" y="94" text-anchor="middle" transform="rotate(-90 242 94)">66 cm</text>
+                </svg>
+              </div>
+              <strong>產品預覽</strong>
+            </div>
+            <div class="preview-meta">
+              <span>厚度 <strong>0.07 mm</strong></span>
+              <span>材質 <strong>PE</strong></span>
+              <span>表面 <strong>亮面</strong></span>
+            </div>
+          </section>
+
+          <section class="left-section notes-section">
+            <div class="left-section-header">
+              <span class="left-section-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M5 5h14v14H5z" />
+                  <path d="M8 9h8M8 13h5" />
+                </svg>
+              </span>
+              <h2>備註</h2>
+            </div>
+            <textarea id="notes" rows="3" placeholder="可在此輸入備註..."></textarea>
+          </section>
+
+          <div class="left-legacy-fields" hidden>
           <div class="panel-heading">
             <span>1</span>
             <h2 id="conditionTitle">平口袋製袋條件</h2>
@@ -185,7 +395,8 @@
           <div class="sub-heading notes-heading">
             <h3>備註</h3>
           </div>
-          <textarea id="notes" rows="4" placeholder="可在此輸入備註..."></textarea>
+          <textarea id="notesLegacy" rows="4" placeholder="可在此輸入備註..."></textarea>
+          </div>
         </section>
 
         <section class="panel production-panel">
@@ -341,7 +552,7 @@
           <p id="extraUnitImpact" class="extra-unit-impact">額外成本換算：每個 +0.00 元</p>
 
           <div class="grand-total">
-            <span>總成本 <small>(含額外成本)</small></span>
+            <span>總成本</span>
             <strong id="grandTotal">0.0</strong>
           </div>
         </section>
@@ -356,9 +567,10 @@
         </aside>
       </section>
 
-      <section class="panel quote-items-panel">
+      <section id="quoteItemsPanel" class="panel quote-items-panel">
         <div class="panel-heading">
           <span>6</span>
+          <a href="#" class="quote-items-close" aria-label="關閉">×</a>
           <h2>報價單明細</h2>
           <em>可加入多品項與階梯報價</em>
         </div>
