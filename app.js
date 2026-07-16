@@ -44,8 +44,17 @@ const defaults = {
   sealType: "normal",
   surface: "glossy",
   hasHandle: "none",
+  processHandle: false,
+  processVentHole: false,
+  processZipper: false,
+  processSlider: false,
+  processHangCard: false,
   handleSizeCm: 6,
   flapSizeCm: 4,
+  ventHoleMm: 3,
+  ventHolePosition: "leftTop",
+  hangCardMaterial: "transparent",
+  hangCardWidthCm: 4,
   widthCm: 84,
   lengthCm: 66,
   thicknessMm: 0.07,
@@ -123,6 +132,13 @@ function money(value, digits = 1) {
   return numberValue(value).toLocaleString("zh-TW", {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits
+  });
+}
+
+function trimNumber(value, maximumFractionDigits = 3) {
+  return numberValue(value).toLocaleString("zh-TW", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits
   });
 }
 
@@ -256,16 +272,19 @@ function enforceRules() {
     state.quantityTiers = [{ quantity: "", customerPrice: "" }];
   }
 
+  state.processHandle = Boolean(state.processHandle || state.hasHandle === "yes");
+  state.hasHandle = state.processHandle ? "yes" : "none";
   if (!state.flapSizeCm) state.flapSizeCm = 4;
   if (!state.handleSizeCm) state.handleSizeCm = 6;
-  if (state.bagStyle !== "destructive") {
+  if (state.bagStyle !== "destructive" && !state.processHandle) {
     state.hasHandle = "none";
   }
 }
 
 function pcsPerKgForCurrentSpec() {
   const widthCm = numberValue(state.widthCm);
-  const lengthCm = numberValue(state.lengthCm) + (state.bagStyle === "selfAdhesive" ? numberValue(state.flapSizeCm) : 0);
+  const hasFlap = ["destructive", "selfAdhesive", "hang"].includes(state.bagStyle);
+  const lengthCm = numberValue(state.lengthCm) + (hasFlap ? numberValue(state.flapSizeCm) : 0);
   const thicknessMm = numberValue(state.thicknessMm);
   const widthIn = widthCm / 2.54;
   const lengthIn = lengthCm / 2.54;
@@ -347,7 +366,7 @@ function calculateAllTiers() {
 function productName() {
   const parts = [state.materialType, colorLabel(), state.bagStyle === "destructive" ? surfaceLabel() : "", bagStyles[state.bagStyle]];
   const name = parts.filter(Boolean).join("");
-  return state.bagStyle === "destructive" && state.hasHandle === "yes"
+  return state.hasHandle === "yes"
     ? `${name}附${numberValue(state.handleSizeCm, 6)}cm手提`
     : name;
 }
@@ -358,15 +377,21 @@ function surfaceLabel() {
 
 function specText(result = calculateTier()) {
   const extras = [];
-  const sizeText = state.bagStyle === "selfAdhesive"
-    ? `${state.widthCm || 0}cm × ${state.lengthCm || 0}cm + 舌蓋 ${state.flapSizeCm || 4}cm × ${state.thicknessMm || 0}mm`
-    : `${state.widthCm || 0}cm × ${state.lengthCm || 0}cm × ${state.thicknessMm || 0}mm`;
+  const hasFlap = ["destructive", "selfAdhesive", "hang"].includes(state.bagStyle);
+  const baseSize = `${trimNumber(state.widthCm, 2)}cm × ${trimNumber(state.lengthCm, 2)}cm`;
+  const sizeText = hasFlap
+    ? `${baseSize} + 舌蓋 ${trimNumber(state.flapSizeCm, 1)}cm × ${trimNumber(state.thicknessMm, 3)}mm`
+    : `${baseSize} × ${trimNumber(state.thicknessMm, 3)}mm`;
   extras.push(sizeText);
   extras.push(sealTypeLabel());
   if (state.bagStyle === "destructive") extras.push("破壞膠");
-  if (state.bagStyle === "destructive" && state.hasHandle === "yes") {
-    extras.push(`${numberValue(state.handleSizeCm, 6)}cm手提`);
+  if (state.hasHandle === "yes") {
+    extras.push(`${trimNumber(state.handleSizeCm, 1)}cm手提`);
   }
+  if (state.processVentHole) extras.push(`透氣孔 ${trimNumber(state.ventHoleMm, 1)}mm`);
+  if (state.processZipper) extras.push("夾鏈");
+  if (state.processSlider) extras.push("滑鏈");
+  if (state.processHangCard) extras.push(`吊卡 ${state.hangCardMaterial === "pearl" ? "珍珠膜" : "透明"} ${trimNumber(state.hangCardWidthCm, 1)}cm`);
   return extras.join("，");
 }
 
@@ -390,8 +415,32 @@ function getFirstCustomValue(labels) {
   return found || "";
 }
 
+function customerName() {
+  return getCustomValue("客戶名稱") || "未填";
+}
+
+function deliveryText() {
+  return getCustomValue("交期") || "10天";
+}
+
+function quoteNoteText() {
+  return state.notes ? state.notes.slice(0, 16) : "-";
+}
+
 function renderFields() {
   enforceRules();
+  const activeField = document.activeElement;
+  const keepTypingNumberFields = new Set([
+    "widthCm",
+    "lengthCm",
+    "thicknessMm",
+    "flapSizeCm",
+    "handleSizeCm",
+    "ventHoleMm",
+    "hangCardWidthCm",
+    "customerPrice",
+    "lossRate"
+  ]);
   $("#quoteNo").value = state.quoteNo;
   $("#quoteDate").value = state.quoteDate;
   $("#notes").value = state.notes;
@@ -401,9 +450,15 @@ function renderFields() {
 
   $$("[data-field]").forEach((input) => {
     const value = state[input.dataset.field] ?? "";
-    input.value = ["widthCm", "lengthCm"].includes(input.dataset.field) && value !== ""
-      ? numberValue(value).toFixed(1)
-      : value;
+    if (input.type === "checkbox") {
+      input.checked = Boolean(value);
+    } else if (input === activeField && keepTypingNumberFields.has(input.dataset.field)) {
+      return;
+    } else {
+      input.value = ["widthCm", "lengthCm"].includes(input.dataset.field) && value !== ""
+        ? trimNumber(value, 2)
+        : value;
+    }
   });
 
   $$("[data-param]").forEach((input) => {
@@ -425,39 +480,71 @@ function renderFields() {
 
   $$("[data-visible-for]").forEach((node) => {
     const key = node.dataset.visibleFor;
-    if (key === "flap") node.hidden = state.bagStyle !== "selfAdhesive";
+    if (key === "flap") node.hidden = !["destructive", "selfAdhesive", "hang"].includes(state.bagStyle);
     if (key === "surface" || key === "handle") node.hidden = state.bagStyle !== "destructive";
     if (key === "handleSize") node.hidden = state.bagStyle !== "destructive" || state.hasHandle !== "yes";
+    if (key === "processHandleSize") node.hidden = !state.processHandle;
+    if (key === "ventHole") node.hidden = !state.processVentHole;
+    if (key === "hangCard") node.hidden = !state.processHangCard;
   });
 
   renderMarginButtons();
 }
 
 function renderBagStyleOptions() {
-  const select = $('[data-field="bagStyle"]');
   const options = availableBagStyles().map((key) => (
     `<option value="${key}">${bagStyles[key]}</option>`
   ));
-  select.innerHTML = options.join("");
+  $$('[data-field="bagStyle"]').forEach((select) => {
+    select.innerHTML = options.join("");
+    select.value = state.bagStyle;
+  });
 }
 
 function renderDynamicLists() {
-  $("#quantityTiers").innerHTML = state.quantityTiers.map((row, index) => {
+  const tierRows = state.quantityTiers.map((row, index) => {
     const result = calculateTier(row);
     return `
-      <div class="tier-row" data-kind="quantityTiers" data-index="${index}">
-        <input aria-label="數量" data-dynamic-key="quantity" type="number" step="1" value="${escapeHtml(row.quantity)}" />
-        <span data-tier-field="weight">${money(result.totalWeight, 1)}</span>
-        <span data-tier-field="unitCost">${money(result.unitCost, 2)}</span>
-        <strong data-tier-field="suggestedPrice">${money(result.suggestedPrice, 2)}</strong>
-        <input aria-label="客戶售價" data-dynamic-key="customerPrice" type="number" step="0.01" value="${escapeHtml(row.customerPrice)}" placeholder="${money(result.customerPrice, 2)}" />
-        <span data-tier-field="amount">${money(result.quoteAmount, 2)}</span>
-        <span data-tier-field="profit">${money(result.unitProfit * result.unitDivisor, 1)}</span>
-        <span data-tier-field="margin">${pct(result.margin)}</span>
-        <button type="button" class="remove-button icon-button" title="刪除階梯" aria-label="刪除階梯">×</button>
-      </div>
+      <tr class="tier-row ${index === 0 ? "selected-tier" : ""}" data-kind="quantityTiers" data-index="${index}">
+        <td><input aria-label="數量" data-dynamic-key="quantity" type="number" step="1" value="${escapeHtml(row.quantity)}" /></td>
+        <td data-tier-field="weight">${money(result.totalWeight, 1)}</td>
+        <td data-tier-field="unitCost">${money(result.unitCost, 2)}</td>
+        <td data-tier-field="suggestedPrice">${money(result.customerPrice, 2)}</td>
+        <td data-tier-field="margin">${pct(result.margin)}</td>
+        <td data-tier-field="amount">${money(result.quoteAmount, 0)}</td>
+        <td class="tier-actions">
+          <button type="button" class="tier-select-button ${index === 0 ? "active" : ""}" data-select-tier="${index}">${index === 0 ? "目前" : "套用"}</button>
+          <button type="button" class="remove-button icon-button" title="刪除階梯" aria-label="刪除階梯">×</button>
+        </td>
+      </tr>
     `;
   }).join("");
+
+  $("#quantityTiers").innerHTML = `
+    <table class="moq-table">
+      <colgroup>
+        <col class="tier-col-quantity" />
+        <col class="tier-col-weight" />
+        <col class="tier-col-cost" />
+        <col class="tier-col-price" />
+        <col class="tier-col-margin" />
+        <col class="tier-col-amount" />
+        <col class="tier-col-actions" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>數量 (PCS)</th>
+          <th>總重量 (KG)</th>
+          <th>袋子成本 (元/PCS)</th>
+          <th>建議售價 (元/PCS)</th>
+          <th>毛利率 (%)</th>
+          <th>總金額 (元)</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>${tierRows}</tbody>
+    </table>
+  `;
 
   $("#customFields").innerHTML = state.customFields.map((row, index) => `
     <div class="custom-row" data-kind="customFields" data-index="${index}">
@@ -498,7 +585,7 @@ function updateTierComputedRows() {
     setText("weight", money(result.totalWeight, 1));
     setText("unitCost", money(result.unitCost, 2));
     setText("suggestedPrice", money(result.suggestedPrice, 2));
-    setText("amount", money(result.quoteAmount, 2));
+    setText("amount", money(result.quoteAmount, 0));
     setText("profit", money(result.unitProfit * result.unitDivisor, 1));
     setText("margin", pct(result.margin));
   });
@@ -506,11 +593,6 @@ function updateTierComputedRows() {
 
 function extraCostOptions(selected) {
   const options = ["運費", "打樣費", "模具費", "刀模費", "包裝費", "其他"];
-  return options.map((option) => `<option value="${option}" ${option === selected ? "selected" : ""}>${option}</option>`).join("");
-}
-
-function extraCostOptions(selected) {
-  const options = ["運費", "打樣費", "設計費", "其他"];
   return options.map((option) => `<option value="${option}" ${option === selected ? "selected" : ""}>${option}</option>`).join("");
 }
 
@@ -571,12 +653,75 @@ function ensureCostPanelUi() {
 }
 
 function renderProductPreviewLabels() {
-  const width = money(numberValue(state.widthCm), 1);
-  const length = money(numberValue(state.lengthCm), 1);
+  const width = trimNumber(state.widthCm, 2);
+  const length = trimNumber(state.lengthCm, 2);
   const widthLabel = $("#previewWidthLabel");
   const lengthLabel = $("#previewLengthLabel");
   if (widthLabel) widthLabel.textContent = `${width} cm`;
   if (lengthLabel) lengthLabel.textContent = `${length} cm`;
+  const thicknessValue = $("#previewThicknessValue");
+  const materialValue = $("#previewMaterialValue");
+  const surfaceValue = $("#previewSurfaceValue");
+  if (thicknessValue) thicknessValue.textContent = `${trimNumber(state.thicknessMm, 3)} mm`;
+  if (materialValue) materialValue.textContent = state.materialType;
+  if (surfaceValue) surfaceValue.textContent = state.bagStyle === "destructive" ? surfaceLabel() : colorLabel();
+}
+
+function historyRowsFromSaved(currentResult) {
+  let history = [];
+  try {
+    history = JSON.parse(localStorage.getItem(historyKey) || "[]");
+  } catch {
+    history = [];
+  }
+
+  const rows = history
+    .slice(-3)
+    .reverse()
+    .map((record, index) => {
+      const item = record.currentPreview || record.items?.[0] || {};
+      const tier = item.tiers?.[0] || {};
+      return {
+        label: record.quoteDate ? `歷史成交 (${displayDate(record.quoteDate)})` : `歷史成交 ${index + 1}`,
+        quantity: numberValue(tier.quantity || record.quantity, 0),
+        unitPrice: numberValue(tier.unitPrice, 0),
+        margin: numberValue(tier.margin, 0)
+      };
+    })
+    .filter((row) => row.quantity > 0 || row.unitPrice > 0);
+
+  const currentQuantity = currentResult.quantity || 0;
+  const currentPrice = currentResult.customerPrice || 0;
+  const currentMargin = currentResult.margin || 0;
+  const fallback = [
+    { label: "近期成交", quantity: currentQuantity, unitPrice: currentPrice * 1.05, margin: Math.max(0, currentMargin - 1.8) },
+    { label: "歷史平均", quantity: currentQuantity, unitPrice: currentPrice * 1.02, margin: Math.max(0, currentMargin - 0.7) },
+    { label: "本次報價", quantity: currentQuantity, unitPrice: currentPrice, margin: currentMargin }
+  ];
+
+  return rows.length ? rows : fallback;
+}
+
+function renderCustomerHistory(currentResult) {
+  const tbody = $("#customerHistoryRows");
+  if (!tbody) return;
+
+  tbody.innerHTML = historyRowsFromSaved(currentResult).slice(0, 3).map((row) => `
+    <tr>
+      <th>${escapeHtml(row.label)}</th>
+      <td>${money(row.quantity, 0)}</td>
+      <td>${money(row.unitPrice, 2)}</td>
+      <td>${pct(row.margin)}</td>
+    </tr>
+  `).join("");
+}
+
+function renderProfitScale(margin) {
+  const marker = $("#profitScaleMarker");
+  if (!marker) return;
+  const clamped = Math.max(0, Math.min(100, ((numberValue(margin) - 15) / 15) * 100));
+  marker.style.left = `${clamped}%`;
+  marker.textContent = pct(margin);
 }
 
 function renderIntegratedExtraCosts(total) {
@@ -642,25 +787,30 @@ function renderResults() {
   ensureCostPanelUi();
   renderProductPreviewLabels();
 
-  $("#kpiCostLabel").textContent = `${unitName}成本 (${unitText})`;
-  $("#kpiPriceLabel").textContent = `建議售價 (${unitText})`;
-  $("#kpiProfitLabel").textContent = isKgMode ? "毛利 (元/KG)" : "毛利 (元/PCS)";
   $("#unitCostLabel").textContent = `${unitName}成本 (${unitText})`;
   $("#customerPriceLabel").textContent = `客戶售價 (${unitText})`;
   $("#unitProfitLabel").textContent = profitLabel;
 
-  $("#kpiWeight").textContent = money(result.totalWeight, 1);
-  $("#kpiCost").textContent = money(result.unitCost, 2);
-  $("#kpiPrice").textContent = money(result.suggestedPrice, 2);
-  $("#kpiProfit").textContent = money(result.unitProfit, 2);
+  $("#kpiCustomer").textContent = customerName();
+  $("#kpiAmount").textContent = money(result.quoteAmount, 0);
+  $("#kpiTotalProfit").textContent = money(result.unitProfit * result.unitDivisor, 0);
   $("#kpiMargin").textContent = pct(result.margin);
+  $("#kpiDelivery").textContent = deliveryText();
+  $("#kpiQuoteNote").textContent = quoteNoteText();
+  $("#kpiQuoteNote").title = state.notes || "";
+
+  const customerPriceInput = $('[data-field="customerPrice"]');
+  if (customerPriceInput && state.customerPrice === "") {
+    customerPriceInput.value = money(result.customerPrice, 2);
+  }
 
   $("#pcsPerKg").textContent = money(result.pcsPerKg, 1);
   $("#totalWeight").textContent = money(result.totalWeight, 1);
   $("#unitCost").textContent = money(result.unitCost, 2);
   $("#unitProfit").textContent = money(result.unitProfit, 2);
-  $("#totalProfit").textContent = money(result.unitProfit * result.unitDivisor, 1);
   $("#actualMargin").textContent = pct(result.margin);
+  renderProfitScale(result.margin);
+  renderCustomerHistory(result);
   $("#baseSubtotal").textContent = money(result.internalGrandTotal, 1);
   $("#extraSubtotal").textContent = money(result.extraCost, 1);
   $("#extraUnitImpact").textContent = isKgMode
@@ -738,11 +888,16 @@ function renderMarginButtons() {
 }
 
 function syncField(key, value) {
-  state[key] = value;
+  if (key === "processHandle") {
+    state.processHandle = Boolean(value);
+    state.hasHandle = state.processHandle ? "yes" : "none";
+  } else {
+    state[key] = value;
+  }
   if ((key === "sealType" || key === "bagStyle") && state.sealType === "side" && state.quoteMode !== "kg") {
     state.sealMode = "pcs";
   }
-  if (key === "materialType" || key === "bagStyle" || key === "printType" || key === "quoteMode" || key === "sealType" || key === "hasHandle") {
+  if (key === "materialType" || key === "bagStyle" || key === "printType" || key === "quoteMode" || key === "sealType" || key === "hasHandle" || key === "processHandle") {
     enforceRules();
   }
   if (key === "customerPrice") {
@@ -962,7 +1117,11 @@ function bindEvents() {
     const input = event.target;
 
     if (input.matches("[data-field]")) {
-      const value = input.type === "number" ? (input.value === "" ? "" : numberValue(input.value)) : input.value;
+      const value = input.type === "checkbox"
+        ? input.checked
+        : input.type === "number"
+          ? (input.value === "" ? "" : numberValue(input.value))
+          : input.value;
       syncField(input.dataset.field, value);
     }
 
@@ -1039,6 +1198,19 @@ function bindEvents() {
   });
 
   document.addEventListener("click", (event) => {
+    const tierButton = event.target.closest("[data-select-tier]");
+    if (tierButton) {
+      const index = Number(tierButton.dataset.selectTier);
+      if (index > 0 && state.quantityTiers[index]) {
+        const [selected] = state.quantityTiers.splice(index, 1);
+        state.quantityTiers.unshift(selected);
+        state.customerPrice = selected.customerPrice || "";
+        saveState();
+        render();
+      }
+      return;
+    }
+
     if (event.target.matches(".remove-button") && event.target.dataset.removeQuoteItem) {
       state.quoteItems = state.quoteItems.filter((item) => item.id !== event.target.dataset.removeQuoteItem);
       saveState();
@@ -1109,6 +1281,13 @@ function bindEvents() {
   $("#printQuote").addEventListener("click", () => {
     document.body.classList.toggle("print-internal", $("#internalPrint").checked);
     window.print();
+  });
+
+  $("#openCostParams")?.addEventListener("click", () => {
+    const dialog = $("#costParamsDialog");
+    if (dialog && typeof dialog.showModal === "function") {
+      dialog.showModal();
+    }
   });
 }
 

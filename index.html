@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>安可包裝智慧報價系統</title>
+    <link rel="icon" href="data:," />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -15,7 +16,7 @@
 
         <section class="title-area">
           <h1>安可包裝智慧報價系統</h1>
-          <p>Smart Quotation System <span class="version-badge">Version 1.06ABLR2</span></p>
+          <p>Smart Quotation System <span class="version-badge">Version 1.09</span></p>
         </section>
 
         <section class="quote-head">
@@ -46,21 +47,22 @@
 
         <nav class="header-secondary" aria-label="功能列">
           <button type="button">客戶資訊</button>
-          <button type="button">成本參數</button>
+          <button type="button" id="openCostParams">成本參數</button>
           <button type="button">歷史報價</button>
           <a href="#quoteItemsPanel">報價明細</a>
         </nav>
       </header>
 
       <section class="layout-grid">
-        <section class="summary-row" aria-label="報價摘要">
+        <section class="summary-row" aria-label="本筆訂單概況">
           <article class="metric-card">
             <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
-              <path d="M24 8v31M11 17h26M16 17 8 33h16L16 17Zm16 0-8 16h16L32 17Z" />
+              <path d="M16 20a8 8 0 1 0 16 0 8 8 0 0 0-16 0Z" />
+              <path d="M9 40c3-7 9-10 15-10s12 3 15 10" />
             </svg>
             <div>
-              <span>總重量 (KG)</span>
-              <strong id="kpiWeight">0.0</strong>
+              <span>客戶</span>
+              <strong id="kpiCustomer">-</strong>
             </div>
           </article>
           <article class="metric-card">
@@ -69,18 +71,19 @@
               <path d="M24 13v22M30 18c-2-2-9-3-10 2-2 8 11 5 9 12-1 4-8 4-11 1" />
             </svg>
             <div>
-              <span id="kpiCostLabel">袋子成本 (元/PCS)</span>
-              <strong id="kpiCost">0.00</strong>
+              <span>預估總金額</span>
+              <strong id="kpiAmount">0</strong>
             </div>
           </article>
           <article class="metric-card">
             <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
-              <path d="M10 25 25 10h13v13L23 38 10 25Z" />
-              <circle cx="34" cy="14" r="2.5" />
+              <path d="M14 34c6-18 14-18 20 0" />
+              <path d="M17 22h14M24 12v24" />
+              <circle cx="24" cy="24" r="17" />
             </svg>
             <div>
-              <span id="kpiPriceLabel">建議售價 (元/PCS)</span>
-              <strong id="kpiPrice">0.00</strong>
+              <span>預估毛利</span>
+              <strong id="kpiTotalProfit">0</strong>
             </div>
           </article>
           <article class="metric-card profit-card">
@@ -92,17 +95,28 @@
               <circle cx="36" cy="14" r="2" />
             </svg>
             <div>
-              <span id="kpiProfitLabel">毛利 (元/PCS)</span>
-              <strong id="kpiProfit">0.00</strong>
+              <span>毛利率</span>
+              <strong id="kpiMargin">0.0%</strong>
             </div>
           </article>
           <article class="metric-card margin-card">
             <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
-              <path d="M8 39h32M12 39V27h6v12M22 39V20h6v19M32 39V12h6v27M13 19l8-6 7 5 10-10" />
+              <path d="M13 8h22v32H13z" />
+              <path d="M17 16h14M17 24h14M17 32h8" />
             </svg>
             <div>
-              <span>毛利率 (%)</span>
-              <strong id="kpiMargin">0.0%</strong>
+              <span>預估交期</span>
+              <strong id="kpiDelivery">-</strong>
+            </div>
+          </article>
+          <article class="metric-card note-card">
+            <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
+              <path d="M12 11h24v26H12z" />
+              <path d="M17 18h14M17 25h14M17 32h8" />
+            </svg>
+            <div>
+              <span>報價備註</span>
+              <strong id="kpiQuoteNote">-</strong>
             </div>
           </article>
         </section>
@@ -150,7 +164,25 @@
               </label>
               <label>
                 <span>厚度</span>
-                <input data-field="thicknessMm" type="number" step="0.01" />
+                <span class="left-unit-input">
+                  <input data-field="thicknessMm" type="number" step="0.01" />
+                  <em>mm</em>
+                </span>
+              </label>
+              <label class="conditional-field" data-visible-for="flap">
+                <span>舌蓋尺寸</span>
+                <select data-field="flapSizeCm">
+                  <option value="1">1 cm</option>
+                  <option value="2">2 cm</option>
+                  <option value="3">3 cm</option>
+                  <option value="4">4 cm</option>
+                  <option value="5">5 cm</option>
+                  <option value="6">6 cm</option>
+                  <option value="7">7 cm</option>
+                  <option value="8">8 cm</option>
+                  <option value="9">9 cm</option>
+                  <option value="10">10 cm</option>
+                </select>
               </label>
               <label>
                 <span>封口方式</span>
@@ -237,22 +269,56 @@
             </div>
 
             <div class="left-field-grid">
-              <label>
-                <span>手提</span>
-                <select data-field="hasHandle">
-                  <option value="none">無手提</option>
-                  <option value="yes">有手提</option>
-                </select>
-              </label>
-              <label>
-                <span>特殊加工</span>
-                <select class="left-static-select" aria-label="特殊加工">
-                  <option>-</option>
-                  <option>開孔</option>
-                  <option>吊卡</option>
-                  <option>特殊貼合</option>
-                </select>
-              </label>
+              <div class="process-checks" aria-label="特殊加工">
+                <div class="process-row">
+                  <label class="process-option"><input data-field="processHandle" type="checkbox" /> <span>手提</span></label>
+                  <div class="process-main" data-visible-for="processHandleSize">
+                    <label><span>尺寸</span><span class="left-unit-input"><input data-field="handleSizeCm" type="number" step="0.1" /><em>cm</em></span></label>
+                    <label><span>位置</span><select aria-label="手提位置"><option>居中</option></select></label>
+                  </div>
+                  <div class="process-preview" aria-hidden="true"></div>
+                </div>
+                <div class="process-row">
+                  <label class="process-option"><input data-field="processVentHole" type="checkbox" /> <span>透氣孔</span></label>
+                  <div class="process-main" data-visible-for="ventHole">
+                    <label><span>孔徑</span><span class="left-unit-input"><input data-field="ventHoleMm" type="number" step="0.1" /><em>mm</em></span></label>
+                    <label>
+                      <span>位置</span>
+                      <select data-field="ventHolePosition">
+                        <option value="leftTop">左上</option>
+                        <option value="leftBottom">左下</option>
+                        <option value="rightTop">右上</option>
+                        <option value="rightBottom">右下</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="process-preview" aria-hidden="true"></div>
+                </div>
+                <div class="process-row">
+                  <label class="process-option"><input data-field="processZipper" type="checkbox" /> <span>夾鏈</span></label>
+                  <div class="process-main process-placeholder"><span>細項待討論</span></div>
+                  <div class="process-preview muted" aria-hidden="true"></div>
+                </div>
+                <div class="process-row">
+                  <label class="process-option"><input data-field="processSlider" type="checkbox" /> <span>滑鏈</span></label>
+                  <div class="process-main process-placeholder"><span>細項待討論</span></div>
+                  <div class="process-preview muted" aria-hidden="true"></div>
+                </div>
+                <div class="process-row">
+                  <label class="process-option"><input data-field="processHangCard" type="checkbox" /> <span>吊卡</span></label>
+                  <div class="process-main" data-visible-for="hangCard">
+                    <label>
+                      <span>材質</span>
+                      <select data-field="hangCardMaterial">
+                        <option value="transparent">透明</option>
+                        <option value="pearl">珍珠膜</option>
+                      </select>
+                    </label>
+                    <label><span>寬度</span><span class="left-unit-input"><input data-field="hangCardWidthCm" type="number" step="0.1" /><em>cm</em></span></label>
+                  </div>
+                  <div class="process-preview" aria-hidden="true"></div>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -297,9 +363,9 @@
               <strong>產品預覽</strong>
             </div>
             <div class="preview-meta">
-              <span>厚度 <strong>0.07 mm</strong></span>
-              <span>材質 <strong>PE</strong></span>
-              <span>表面 <strong>亮面</strong></span>
+              <span>厚度 <strong id="previewThicknessValue">0.07 mm</strong></span>
+              <span>材質 <strong id="previewMaterialValue">PE</strong></span>
+              <span>表面 <strong id="previewSurfaceValue">亮面</strong></span>
             </div>
           </section>
 
@@ -399,113 +465,181 @@
           </div>
         </section>
 
-        <section class="panel production-panel">
+        <section class="panel decision-panel">
           <div class="panel-heading">
             <span>2</span>
-            <h2>生產資訊</h2>
+            <h2>報價決策中心</h2>
           </div>
-          <div class="info-table compact-info">
-            <div><span>每公斤可做 (PCS)</span><strong id="pcsPerKg">0.0</strong></div>
-            <div class="highlight"><span>目前階梯重量 (KG)</span><strong id="totalWeight">0.0</strong></div>
+
+          <section class="decision-section pricing-decision">
+            <h3>價格設定</h3>
+            <div class="price-flow">
+              <article>
+                <span id="unitCostLabel">袋子成本 (元/PCS)</span>
+                <strong id="unitCost">0.00</strong>
+              </article>
+              <b>→</b>
+              <article class="editable-price">
+                <span id="customerPriceLabel">售價 (元/PCS)</span>
+                <input class="price-input-large" data-field="customerPrice" type="number" step="0.01" />
+              </article>
+              <b>→</b>
+              <article>
+                <span id="unitProfitLabel">毛利 (元/PCS)</span>
+                <strong id="unitProfit" class="green">0.00</strong>
+              </article>
+              <b>→</b>
+              <article>
+                <span>毛利率 (%)</span>
+                <strong id="actualMargin" class="green">0.0%</strong>
+              </article>
+            </div>
+
+            <div class="profit-standard" aria-label="公司利潤標準">
+              <div class="profit-scale">
+                <i style="left:0%"></i>
+                <i style="left:33%"></i>
+                <i style="left:66%"></i>
+                <i style="left:100%"></i>
+                <strong id="profitScaleMarker" style="left:33%">18.0%</strong>
+              </div>
+              <div class="profit-labels">
+                <span>最低標準 15%</span>
+                <span>公司建議 20%</span>
+                <span>目標毛利 25%</span>
+              </div>
+            </div>
+
+            <div class="decision-controls">
+              <div class="margin-tools" aria-label="快速調整毛利率">
+                <span>目標毛利率</span>
+                <button type="button" data-margin="10">10%</button>
+                <button type="button" data-margin="15">15%</button>
+                <button type="button" data-margin="20">20%</button>
+                <button type="button" data-margin="25">25%</button>
+                <button type="button" data-margin="30">30%</button>
+                <button type="button" data-margin="35">35%</button>
+                <button type="button" id="recalcPrice" title="依目標毛利率重算售價">↻</button>
+              </div>
+            </div>
+          </section>
+
+          <div class="decision-two-col">
+            <section class="decision-section production-summary">
+              <h3>報價基礎資料</h3>
+              <dl>
+                <div><dt>每公斤可做</dt><dd id="pcsPerKg">0.0</dd></div>
+                <div><dt>目前階梯重量</dt><dd id="totalWeight">0.0</dd></div>
+                <div class="basis-control">
+                  <dt>損耗率</dt>
+                  <dd><input data-field="lossRate" type="number" step="0.1" /></dd>
+                </div>
+                <div class="basis-control">
+                  <dt>計價方式</dt>
+                  <dd>
+                    <select data-field="quoteMode">
+                      <option value="pcs">按袋數</option>
+                      <option value="kg">按重量</option>
+                    </select>
+                  </dd>
+                </div>
+              </dl>
+            </section>
+
+            <section class="decision-section customer-history">
+              <h3>客戶歷史價格比較</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>項目</th>
+                    <th>數量</th>
+                    <th>單價</th>
+                    <th>毛利</th>
+                  </tr>
+                </thead>
+                <tbody id="customerHistoryRows"></tbody>
+              </table>
+            </section>
           </div>
+
+          <section class="decision-section moq-section">
+            <div class="decision-section-title">
+              <h3>MOQ / 階梯報價模擬</h3>
+              <button type="button" id="addQuantityTier" class="plus-button" title="新增階梯數量">+</button>
+            </div>
+            <div id="quantityTiers" class="tier-table"></div>
+            <div class="quote-actions">
+              <button type="button" id="addQuoteItem">加入報價單</button>
+              <button type="button" id="clearQuoteItems" class="ghost">清空明細</button>
+            </div>
+          </section>
+
+          <div class="mid-height-reserve" aria-hidden="true"></div>
         </section>
 
-        <section class="panel quote-panel">
-          <div class="panel-heading quote-heading">
-            <span>3</span>
-            <h2>報價分析</h2>
-            <div class="margin-tools" aria-label="快速調整毛利率">
-              <button type="button" data-margin="15">15%</button>
-              <button type="button" data-margin="20">20%</button>
-              <button type="button" data-margin="25">25%</button>
-              <button type="button" data-margin="30">30%</button>
-              <button type="button" id="recalcPrice" title="依目標毛利率重算售價">↻</button>
+        <dialog id="costParamsDialog">
+          <form method="dialog" class="cost-param-dialog">
+            <header>
+              <h2>成本參數設定</h2>
+              <button type="submit" aria-label="關閉">×</button>
+            </header>
+            <div class="price-tables">
+              <div class="price-table">
+                <h3>原料</h3>
+                <div class="table-head"><span>材料</span><span>單價 (元/KG)</span></div>
+                <label><span>透明</span><input data-param="transparentPrice" type="number" step="0.1" /></label>
+                <label><span>白色</span><input data-param="milkWhitePrice" type="number" step="0.1" /></label>
+                <label><span>染黑</span><input data-param="blackPrice" type="number" step="0.1" /></label>
+                <label><span>特殊色</span><input data-param="specialColorPrice" type="number" step="0.1" /></label>
+              </div>
+              <div class="price-table">
+                <h3>加工</h3>
+                <div class="table-head"><span>項目</span><span>單價</span></div>
+                <label>
+                  <span>印刷方式</span>
+                  <select data-field="printType">
+                    <option value="none">無印刷</option>
+                    <option value="single">單面印刷</option>
+                    <option value="double">雙面印刷</option>
+                  </select>
+                </label>
+                <label>
+                  <span>印刷色數</span>
+                  <select data-field="printColors">
+                    <option value="0">0 色</option>
+                    <option value="1">1 色</option>
+                    <option value="2">2 色</option>
+                    <option value="3">3 色</option>
+                    <option value="4">4 色</option>
+                    <option value="5">5 色</option>
+                    <option value="6">6 色</option>
+                    <option value="7">7 色</option>
+                    <option value="8">8 色</option>
+                  </select>
+                </label>
+                <label><span>印刷費 (元/KG/色)</span><input data-param="printFeePerKgColor" type="number" step="0.1" /></label>
+                <label><span>版費</span><input data-param="plateFee" type="number" step="1" /></label>
+                <label>
+                  <span>版費報價方式</span>
+                  <select data-field="plateMode">
+                    <option value="waived">無版費</option>
+                    <option value="separate">版費獨立報</option>
+                    <option value="included">版費含內報</option>
+                  </select>
+                </label>
+                <label><span>封口加工費 (元/KG)</span><input data-param="sealFeePerKg" type="number" step="0.1" /></label>
+                <label><span>封口加工費 (元/PCS)</span><input data-param="sealFeePerPcs" type="number" step="0.01" /></label>
+              </div>
             </div>
-          </div>
-          <div class="info-table quote-table">
-            <div>
-              <span>報價模式</span>
-              <select data-field="quoteMode">
-                <option value="pcs">按袋數（元/PCS）</option>
-                <option value="kg">按重量（元/KG）</option>
-              </select>
-            </div>
-            <div><span>損耗率 (%)</span><input data-field="lossRate" type="number" step="0.1" /></div>
-            <div><span id="unitCostLabel">袋子成本 (元/PCS)</span><strong id="unitCost">0.00</strong></div>
-            <div><span id="customerPriceLabel">客戶售價 (元/PCS)</span><input class="price-input-large" data-field="customerPrice" type="number" step="0.01" /></div>
-            <div><span id="unitProfitLabel">每個利潤</span><strong id="unitProfit" class="green">0.00</strong></div>
-            <div><span>目前階梯利潤</span><strong id="totalProfit" class="green">0.0</strong></div>
-            <div><span>毛利率 (%)</span><strong id="actualMargin" class="green">0.0%</strong></div>
-          </div>
-          <div class="sub-heading">
-            <h3>階梯數量</h3>
-            <button type="button" id="addQuantityTier" class="plus-button" title="新增階梯數量">+</button>
-          </div>
-          <div id="quantityTiers" class="tier-table"></div>
-          <div class="quote-actions">
-            <button type="button" id="addQuoteItem">加入報價單</button>
-            <button type="button" id="clearQuoteItems" class="ghost">清空明細</button>
-          </div>
-        </section>
-
-        <section class="panel price-panel">
-          <div class="panel-heading">
-            <span>4</span>
-            <h2>成本參數設定 <small>（本月）</small></h2>
-          </div>
-          <div class="price-tables">
-            <div class="price-table">
-              <h3>原料</h3>
-              <div class="table-head"><span>材料</span><span>單價 (元/KG)</span></div>
-              <label><span>透明</span><input data-param="transparentPrice" type="number" step="0.1" /></label>
-              <label><span>白色</span><input data-param="milkWhitePrice" type="number" step="0.1" /></label>
-              <label><span>染黑</span><input data-param="blackPrice" type="number" step="0.1" /></label>
-              <label><span>特殊色</span><input data-param="specialColorPrice" type="number" step="0.1" /></label>
-            </div>
-            <div class="price-table">
-              <h3>加工</h3>
-              <div class="table-head"><span>項目</span><span>單價</span></div>
-              <label>
-                <span>印刷方式</span>
-                <select data-field="printType">
-                  <option value="none">無印刷</option>
-                  <option value="single">單面印刷</option>
-                  <option value="double">雙面印刷</option>
-                </select>
-              </label>
-              <label>
-                <span>印刷色數</span>
-                <select data-field="printColors">
-                  <option value="0">0 色</option>
-                  <option value="1">1 色</option>
-                  <option value="2">2 色</option>
-                  <option value="3">3 色</option>
-                  <option value="4">4 色</option>
-                  <option value="5">5 色</option>
-                  <option value="6">6 色</option>
-                  <option value="7">7 色</option>
-                  <option value="8">8 色</option>
-                </select>
-              </label>
-              <label><span>印刷費 (元/KG/色)</span><input data-param="printFeePerKgColor" type="number" step="0.1" /></label>
-              <label><span>版費</span><input data-param="plateFee" type="number" step="1" /></label>
-              <label>
-                <span>版費報價方式</span>
-                <select data-field="plateMode">
-                  <option value="waived">無版費</option>
-                  <option value="separate">版費獨立報</option>
-                  <option value="included">版費含內報</option>
-                </select>
-              </label>
-              <label><span>封口加工費 (元/KG)</span><input data-param="sealFeePerKg" type="number" step="0.1" /></label>
-              <label><span>封口加工費 (元/PCS)</span><input data-param="sealFeePerPcs" type="number" step="0.01" /></label>
-            </div>
-          </div>
-        </section>
+            <menu>
+              <button value="default" class="header-dialog-done">完成</button>
+            </menu>
+          </form>
+        </dialog>
 
         <section class="panel cost-panel internal-only">
           <div class="panel-heading">
-            <span>5</span>
+            <span>3</span>
             <h2>成本分析</h2>
             <em>目前第一個階梯</em>
           </div>
@@ -513,15 +647,19 @@
             <thead>
               <tr>
                 <th>項目</th>
-                <th>計算說明</th>
                 <th>金額 (元)</th>
+                <th>占比</th>
+                <th>說明</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="costRows"></tbody>
             <tfoot>
               <tr>
-                <td colspan="2">小計</td>
+                <td>總成本</td>
                 <td id="baseSubtotal">0.0</td>
+                <td>100%</td>
+                <td colspan="2"></td>
               </tr>
             </tfoot>
           </table>
@@ -569,7 +707,7 @@
 
       <section id="quoteItemsPanel" class="panel quote-items-panel">
         <div class="panel-heading">
-          <span>6</span>
+          <span>5</span>
           <a href="#" class="quote-items-close" aria-label="關閉">×</a>
           <h2>報價單明細</h2>
           <em>可加入多品項與階梯報價</em>
